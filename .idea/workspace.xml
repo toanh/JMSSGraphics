@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/JMSSGraphics/JMSSPong.py" line="5" />
+    <bookmark url="file://$PROJECT_DIR$/JMSSGraphics/JMSSPong.py" line="7" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8b11fee6-3a9b-4747-8570-de28175e31a5" name="Default" comment="">
@@ -54,11 +54,21 @@
       <file leaf-file-name="JMSSPong.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/JMSSGraphics/JMSSPong.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="396">
-              <caret line="123" column="10" selection-start-line="123" selection-start-column="10" selection-end-line="123" selection-end-column="10" />
+            <state relative-caret-position="540">
+              <caret line="125" column="48" selection-start-line="125" selection-start-column="48" selection-end-line="125" selection-end-column="48" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name=".gitattributes" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/.gitattributes">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -98,8 +108,8 @@
       <file leaf-file-name="JMSSGraphics_pyglet.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/JMSSGraphics/JMSSGraphics_pyglet.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="342">
-              <caret line="355" column="15" selection-start-line="355" selection-start-column="15" selection-end-line="355" selection-end-column="15" />
+            <state relative-caret-position="236">
+              <caret line="396" column="104" selection-start-line="396" selection-start-column="104" selection-end-line="396" selection-end-column="104" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -117,7 +127,9 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="FORCE_PUSH_ALLOWED" value="true" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -200,9 +212,14 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="settings.editor.selected.configurable" value="settings.github" />
+    <property name="settings.editor.selected.configurable" value="vcs.Git" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\GitHub\JMSS\JMSSGraphics" />
+    </key>
   </component>
   <component name="RunManager" selected="Python.JMSSPong">
     <configuration default="false" name="Pong" type="PythonConfigurationType" factoryName="Python" temporary="true">
@@ -426,7 +443,14 @@
       <option name="project" value="LOCAL" />
       <updated>1516022211526</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="updating comments">
+      <created>1516025261978</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1516025261978</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -645,6 +669,14 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/.gitattributes">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/JMSSGraphics/JMSS.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-34">
@@ -657,8 +689,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/JMSSGraphics/JMSSGraphics_pyglet.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="355" column="15" selection-start-line="355" selection-start-column="15" selection-end-line="355" selection-end-column="15" />
+        <state relative-caret-position="236">
+          <caret line="396" column="104" selection-start-line="396" selection-start-column="104" selection-end-line="396" selection-end-column="104" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>
@@ -667,8 +699,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/JMSSGraphics/JMSSPong.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="396">
-          <caret line="123" column="10" selection-start-line="123" selection-start-column="10" selection-end-line="123" selection-end-column="10" />
+        <state relative-caret-position="540">
+          <caret line="125" column="48" selection-start-line="125" selection-start-column="48" selection-end-line="125" selection-end-column="48" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>

@@ -394,7 +394,18 @@ class Graphics:
     def getMousePos(self):
         return self._invconv(pygame.mouse.get_pos())
 
+    def drawText(self, text, x, y, fontName = "Arial", fontSize = 10, anchorX = "left", anchorY ="bottom"):
+        label = pyglet.text.Label(text, font_name=fontName, font_size=fontSize, x = x, y = y, anchor_x = anchorX, anchor_y = anchorY)
+        label.draw()
+
+    def drawSprite(self, sprite, x, y):
+        sprite.x = x
+        sprite.y = y
+        sprite.draw()
+
+    '''
     def drawImage(self, image, pos, rotation = 0, pivot = None, alpha = None, scale = None, rect = None):
+
         temp = image
 
         if (alpha is not None):
@@ -410,6 +421,8 @@ class Graphics:
         temp.get_rect().center = pivot
 
         self.screen.blit(temp, self._conv(pos), rect)
+    '''
+
 
     def drawCircle(self, color, pos, radius, width = 0):
         pygame.draw.circle(self.screen, color, self._conv(pos), radius, width)
