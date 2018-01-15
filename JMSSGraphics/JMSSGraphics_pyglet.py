@@ -371,6 +371,7 @@ class Graphics:
         return pyglet.resource.image(file)
 
     def createSprite(self, image):
+        # if the filename is supplied, create an image and autocreate the sprite
         if (isinstance(image, str)):
             return pyglet.sprite.Sprite(self.loadImage(image))
         else:
