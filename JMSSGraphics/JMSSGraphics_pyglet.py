@@ -216,8 +216,8 @@ KEY_ASCIITILDE    = 0x07e
 
 class JMSSPygletApp(pyglet.window.Window):
     def __init__(self, fps, graphics, *args, **kwargs):
-        super(JMSSPygletApp, self).__init__(width=800,
-                                   height=600,
+        super(JMSSPygletApp, self).__init__(width=graphics.width,
+                                   height=graphics.height,
                                    *args,
                                    **kwargs)
 
@@ -362,7 +362,8 @@ class Graphics:
     def mainloop(self, func):
         self.app.draw_func = func
 
-    def clear(self):
+    def clear(self, r = 0, g = 0, b = 0, a = 1):
+        pyglet.gl.glClearColor(r, g, b, a)
         self.app.clear()
 
     def setFPS(self, fps):
@@ -387,6 +388,9 @@ class Graphics:
     def isKeyDown(self, key):
         return self.app.keys[key]
 
+    def _convColor(self, c):
+        return (int(c[0] * 255.0), int(c[1] * 255.0), int(c[2] * 255.0), int(c[3] * 255.0))
+
     def createLabel(self, text, fontName, fontSize, x, y, anchorX, anchorY):
         return pyglet.text.Label(text, font_name=fontName, font_size=fontSize, x = x, y = y, anchor_x = anchorX, anchor_y = anchorY)
 
@@ -394,8 +398,8 @@ class Graphics:
     def getMousePos(self):
         return self._invconv(pygame.mouse.get_pos())
 
-    def drawText(self, text, x, y, fontName = "Arial", fontSize = 10, anchorX = "left", anchorY ="bottom"):
-        label = pyglet.text.Label(text, font_name=fontName, font_size=fontSize, x = x, y = y, anchor_x = anchorX, anchor_y = anchorY)
+    def drawText(self, text, x, y, fontName = "Arial", fontSize = 10, color = (1, 1, 1, 1), anchorX = "left", anchorY ="bottom"):
+        label = pyglet.text.Label(text, color = self._convColor(color), font_name=fontName, font_size=fontSize, x = x, y = y, anchor_x = anchorX, anchor_y = anchorY)
         label.draw()
 
     def drawSprite(self, sprite, x, y):
