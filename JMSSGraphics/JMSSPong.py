@@ -10,7 +10,6 @@ player2_sprite = None
 p1_score = None
 p2_score = None
 
-
 def reset_ball():
     global ball_sprite
     ball_sprite.x = 400
@@ -55,7 +54,6 @@ def draw():
     player1_sprite.draw()
     player2_sprite.draw()
     ball_sprite.draw()
-
 
 def update():
     global player1_sprite, player2_sprite, ball_sprite, p1_score, p2_score
