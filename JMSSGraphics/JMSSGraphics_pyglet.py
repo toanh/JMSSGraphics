@@ -225,17 +225,21 @@ class JMSSPygletApp(pyglet.window.Window):
 
         self.graphics = graphics
         self.draw_func = None
+        self.init_func = None
 
         pyglet.gl.glClearColor(0.5, 0, 0, 1)
         self.fps = fps
 
     def start(self):
+        if (self.init_func is not None):
+            self.init_func()
         pyglet.clock.schedule_interval(self.mainloop, 1.0 / self.fps)
         pyglet.clock.set_fps_limit(self.fps)
 
     def mainloop(self, *args, **kwargs):
         #self.graphics.update()
-        self.draw_func()
+        if (self.draw_func is not None):
+            self.draw_func()
 
     def on_key_press(self, symbol, modifiers):
         self.keys[symbol] = True
@@ -352,7 +356,10 @@ class Graphics:
         self.app.start()
         pyglet.app.run()
 
-    def draw(self, func):
+    def init(self, func):
+        self.app.init_func = func
+
+    def mainloop(self, func):
         self.app.draw_func = func
 
     def clear(self):

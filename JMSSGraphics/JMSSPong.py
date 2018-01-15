@@ -112,12 +112,13 @@ def update():
 
 jmss = Graphics(800, 600)
 
-
-@jmss.draw
-def mainloop():
+@jmss.mainloop
+def game():
     update()
     draw()
 
+@jmss.init
+def setupGame():
+    init()
 
-init()
 jmss.run()
