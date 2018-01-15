@@ -2,6 +2,8 @@ import random
 
 from JMSSGraphics.JMSSGraphics_pyglet import *
 
+bg_sprite = None
+
 ball_sprite = None
 
 player1_sprite = None
@@ -18,7 +20,8 @@ def reset_ball():
     ball_sprite.vel_y = ((random.randint(0, 1) * 2) - 1) * 5
 
 def init():
-    global player1_sprite, player2_sprite, ball_sprite, p1_score, p2_score
+    global player1_sprite, player2_sprite, ball_sprite, p1_score, p2_score, bg_sprite
+    bg_sprite = jmss.createSprite("ball.png")
     player1_sprite = jmss.createSprite("paddle.png")
     player2_sprite = jmss.createSprite("paddle.png")
     ball_sprite = jmss.createSprite("ball.png")
@@ -112,12 +115,18 @@ def update():
 
 jmss = Graphics(800, 600)
 
-
-@jmss.draw
-def mainloop():
+@jmss.mainloop
+def game():
     update()
     draw()
 
+    global bg_sprite
+    jmss.drawSprite(bg_sprite, 0, 0)
 
-init()
+    jmss.drawText("Hello, world!", x = 0, y = 50)
+
+@jmss.init
+def setupGame():
+    init()
+
 jmss.run()
