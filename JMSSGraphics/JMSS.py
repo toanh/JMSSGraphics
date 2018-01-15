@@ -15,7 +15,7 @@ class Turtle:
         self.fill_colour = (255, 255, 255)
         self.fill_mode = False
         self.line_list = []
-        self.pen_width = 1
+        self.pen_width = 2
 
     def penUp(self):
         self.pen_down = False
