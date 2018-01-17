@@ -394,6 +394,15 @@ class Graphics:
     def createLabel(self, text, fontName, fontSize, x, y, anchorX, anchorY):
         return pyglet.text.Label(text, font_name=fontName, font_size=fontSize, x = x, y = y, anchor_x = anchorX, anchor_y = anchorY)
 
+    def loadSound(self, filename, streaming = False):
+        return pyglet.media.load(filename=filename, streaming=streaming)
+
+    def playSound(self, sound):
+        sound.play()
+
+    def pauseSound(self, sound):
+        sound.pause()
+
 
     def getMousePos(self):
         return self._invconv(pygame.mouse.get_pos())
