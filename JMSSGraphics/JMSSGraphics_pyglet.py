@@ -352,6 +352,8 @@ class Graphics:
 
         self.app = JMSSPygletApp(fps, self)
 
+        self.soundPlayers = {}
+
     def run(self):
         self.app.start()
         pyglet.app.run()
@@ -397,11 +399,22 @@ class Graphics:
     def loadSound(self, filename, streaming = False):
         return pyglet.media.load(filename=filename, streaming=streaming)
 
-    def playSound(self, sound):
-        sound.play()
+    def playSound(self, sound, loop = False):
+        if sound in self.soundPlayers:
+            self.soundPlayers[sound].pause()
+            self.soundPlayers[sound] = None
+        player = pyglet.media.Player()
+        sg = pyglet.media.SourceGroup(sound.audio_format, None)
+        sg.queue(sound)
+        sg.loop = loop
+        self.soundPlayers[sound] = player
+        player.queue(sg)
+        player.play()
 
     def pauseSound(self, sound):
-        sound.pause()
+        if sound in self.soundPlayers:
+            self.soundPlayers[sound].pause()
+
 
 
     def getMousePos(self):

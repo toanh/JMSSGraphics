@@ -13,6 +13,7 @@ p1_score = None
 p2_score = None
 
 blip_sound = None
+music = None
 
 def reset_ball():
     global ball_sprite
@@ -22,12 +23,13 @@ def reset_ball():
     ball_sprite.vel_y = ((random.randint(0, 1) * 2) - 1) * 5
 
 def init():
-    global player1_sprite, player2_sprite, ball_sprite, p1_score, p2_score, bg_sprite, blip_sound
+    global player1_sprite, player2_sprite, ball_sprite, p1_score, p2_score, bg_sprite, blip_sound, music
     bg_sprite = jmss.createSprite("ball.png")
     player1_sprite = jmss.createSprite("paddle.png")
     player2_sprite = jmss.createSprite("paddle.png")
     ball_sprite = jmss.createSprite("ball.png")
     blip_sound = jmss.loadSound("blip.wav")
+    music = jmss.loadSound("piano.wav")
 
     player1_sprite.x = 50
     player1_sprite.y =300
@@ -72,6 +74,10 @@ def update():
     elif jmss.isKeyDown(KEY_K):
         player2_sprite.y -= 5
 
+    if jmss.isKeyDown(KEY_SPACE):
+        jmss.pauseSound(blip_sound)
+        jmss.pauseSound(music)
+
     if (player1_sprite.y < 0):
         player1_sprite.y = 0
 
@@ -97,7 +103,7 @@ def update():
         ball_sprite.vel_x = - ball_sprite.vel_x
         ball_sprite.x = player1_sprite.x + player1_sprite.width
         player1_sprite.score += 1
-        jmss.playSound(blip_sound)
+        jmss.playSound(blip_sound, True)
 
     if (ball_sprite.x + ball_sprite.width / 2 <= player2_sprite.x + player2_sprite.width and
                     ball_sprite.x + ball_sprite.width / 2 >= player2_sprite.x and
@@ -106,7 +112,7 @@ def update():
         ball_sprite.vel_x = - ball_sprite.vel_x
         ball_sprite.x = player2_sprite.x - ball_sprite.width
         player2_sprite.score += 1
-        jmss.playSound(blip_sound)
+        jmss.playSound(music)
 
     if (ball_sprite.x < -ball_sprite.width or
                 ball_sprite.x > 800):
