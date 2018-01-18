@@ -217,7 +217,7 @@ KEY_ASCIITILDE    = 0x07e
 class JMSSPygletApp(pyglet.window.Window):
     def __init__(self, fps, graphics, *args, **kwargs):
         super(JMSSPygletApp, self).__init__(width=graphics.width,
-                                   height=graphics.height,
+                                   height=graphics.height, caption=graphics.title,
                                    *args,
                                    **kwargs)
 
@@ -247,101 +247,12 @@ class JMSSPygletApp(pyglet.window.Window):
     def on_key_release(self, symbol, modifiers):
         self.keys[symbol] = False
 
-class Turtle:
-    def __init__(self, graphics):
-        self.graphics = graphics
-
-        self.pen_x = 0
-        self.pen_y = 0
-        self.pen_dx = 0
-        self.pen_dy = 1
-        self.pen_heading = 0
-        self.pen_down = False
-        self.pen_colour = (255, 255, 255)
-        self.fill_colour = (255, 255, 255)
-        self.fill_mode = False
-        self.line_list = []
-        self.pen_width = 1
-
-    def penUp(self):
-        self.pen_down = False
-
-    def penDown(self):
-        self.pen_down = True
-
-    def setPenColor(self, color):
-        self.pen_colour = color
-
-    def setFillColor(self, color):
-        self.fill_colour = color
-
-    def setHeading(self, heading):
-        self.pen_heading = heading
-        angle = (90 - heading) * 3.1415926535 / 180
-        self.pen_dx = math.cos(angle)
-        self.pen_dy = math.sin(angle)
-
-    def turnRight(self, angle):
-        self.setHeading(self.pen_heading + angle)
-
-    def turnLeft(self, angle):
-        self.setHeading(self.pen_heading - angle)
-
-    def setPos(self, x, y):
-        if (self.pen_down):
-            pygame.draw.line(self.graphics.screen,
-                             self.pen_colour,
-                             self.graphics._conv((self.pen_x, self.pen_y)),
-                             self.graphics._conv((x, y)),
-                             self.pen_width)
-
-        self.pen_x = x
-        self.pen_y = y
-
-    def beginFill(self):
-        self.line_list = []
-        self.fill_mode = True
-
-    def endFill(self):
-        self.fill_mode = False
-        if (self.fill_colour == self.pen_colour):
-            pygame.draw.polygon(self.graphics.screen,
-                                self.pen_colour,
-                                self.line_list,
-                                0)
-        else:
-            pygame.draw.polygon(self.graphics.screen,
-                                self.fill_colour,
-                                self.line_list,
-                                0)
-            pygame.draw.polygon(self.graphics.screen,
-                                self.pen_colour,
-                                self.line_list,
-                                self.pen_width)
-        self.line_list = []
-
-    def forward(self, length):
-        end_x = self.pen_dx * length + self.pen_x
-        end_y = self.pen_dy * length + self.pen_y
-
-        if (self.fill_mode):
-            self.line_list.append(self.graphics._conv((end_x, end_y)))
-        else:
-            if (self.pen_down):
-                pygame.draw.line(self.graphics.screen,
-                                 self.pen_colour,
-                                 self.graphics._conv((self.pen_x, self.pen_y)),
-                                 self.graphics._conv((end_x, end_y)),
-                                 self.pen_width)
-
-        self.pen_x = end_x
-        self.pen_y = end_y
-
 
 class Graphics:
     def __init__(self, w, h, title = "", fps = 60):
         self.width = w
         self.height = h
+        self.title = title
         self.done = False
         self.fps = fps
 
@@ -370,12 +281,6 @@ class Graphics:
 
     def setFPS(self, fps):
         self.fps = fps
-
-    def createTurtle(self):
-        return Turtle(self)
-
-    def addEventListener(self, listener):
-        self.listeners.append(listener)
 
     def loadImage(self, file):
         return pyglet.resource.image(file)
@@ -415,40 +320,35 @@ class Graphics:
         if sound in self.soundPlayers:
             self.soundPlayers[sound].pause()
 
-
-
-    def getMousePos(self):
-        return self._invconv(pygame.mouse.get_pos())
-
     def drawText(self, text, x, y, fontName = "Arial", fontSize = 10, color = (1, 1, 1, 1), anchorX = "left", anchorY ="bottom"):
         label = pyglet.text.Label(text, color = self._convColor(color), font_name=fontName, font_size=fontSize, x = x, y = y, anchor_x = anchorX, anchor_y = anchorY)
         label.draw()
 
-    def drawSprite(self, sprite, x, y):
-        sprite.x = x
-        sprite.y = y
+    def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=None, rect=None):
+        sprite = pyglet.sprite.Sprite(image)
+        sprite.x = x + anchorX
+        sprite.y = y + anchorY
+        if width is not None:
+            sprite.scale_x =  width * 1.0 / sprite.width
+        if height is not None:
+            sprite.scale_y = height * 1.0  / sprite.height
+
+        anchor_x = image.anchor_x
+        anchor_y = image.anchor_y
+
+        if anchorX is not None:
+            image.anchor_x = anchorX
+        if anchorY is not None:
+            image.anchor_y = anchorY
+
+        if opacity is not None:
+            sprite.opacity = int(opacity * 255)
+
+        sprite.rotation = rotation
         sprite.draw()
 
-    '''
-    def drawImage(self, image, pos, rotation = 0, pivot = None, alpha = None, scale = None, rect = None):
-
-        temp = image
-
-        if (alpha is not None):
-            temp = image.copy()
-            temp.fill((255, 255, 255, alpha), None, pygame.BLEND_RGBA_MULT)
-
-        if (scale is not None):
-            temp = pygame.transform.scale(temp, scale)
-
-        if (pivot is None):
-            pivot = temp.get_rect().center
-        temp = pygame.transform.rotate(temp, rotation)
-        temp.get_rect().center = pivot
-
-        self.screen.blit(temp, self._conv(pos), rect)
-    '''
-
+        image.anchor_x = anchor_x
+        image.anchor_y = anchor_y
 
     def drawCircle(self, color, pos, radius, width = 0):
         pygame.draw.circle(self.screen, color, self._conv(pos), radius, width)
