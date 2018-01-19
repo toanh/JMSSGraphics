@@ -24,7 +24,7 @@ def reset_ball():
 
 def init():
     global player1_sprite, player2_sprite, ball_sprite, p1_score, p2_score, bg_sprite, blip_sound, music
-    bg_sprite = jmss.loadImage("ball.png")
+    bg_sprite = jmss.loadImage("smiley.png")
     player1_sprite = jmss.createSprite("paddle.png")
     player2_sprite = jmss.createSprite("paddle.png")
     ball_sprite = jmss.createSprite("ball.png")
@@ -57,6 +57,11 @@ def init():
 def draw():
     global player1_sprite, player2_sprite, ball_sprite, p1_score, p2_score
     jmss.clear()
+    #global bg_sprite
+    jmss.drawImage(bg_sprite, 0, 0, 256, 256, anchorX=0.5, anchorY=0.5, rotation=45, opacity=0.5)
+
+    jmss.drawText("Hello, world!", x=0, y=50)
+
     p1_score.draw()
     p2_score.draw()
     player1_sprite.draw()
@@ -130,11 +135,6 @@ jmss = Graphics(800, 600, "Pong!")
 def game():
     update()
     draw()
-
-    global bg_sprite
-    jmss.drawImage(bg_sprite, 0, 0, 100, 100, anchorX = 16, anchorY=0, rotation = 45, opacity=0.5)
-
-    jmss.drawText("Hello, world!", x = 0, y = 50)
 
 @jmss.init
 def setupGame():

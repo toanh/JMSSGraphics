@@ -54,8 +54,8 @@
       <file leaf-file-name="JMSSPong.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/JMSSGraphics/JMSSPong.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="462">
-              <caret line="134" column="58" lean-forward="false" selection-start-line="134" selection-start-column="58" selection-end-line="134" selection-end-column="58" />
+            <state relative-caret-position="418">
+              <caret line="15" column="12" lean-forward="false" selection-start-line="15" selection-start-column="12" selection-end-line="15" selection-end-column="12" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -98,8 +98,8 @@
       <file leaf-file-name="JMSSGraphics_pyglet.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/JMSSGraphics/JMSSGraphics_pyglet.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="264">
-              <caret line="332" column="30" lean-forward="true" selection-start-line="332" selection-start-column="30" selection-end-line="332" selection-end-column="30" />
+            <state relative-caret-position="22">
+              <caret line="257" column="0" lean-forward="false" selection-start-line="257" selection-start-column="0" selection-end-line="257" selection-end-column="0" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -127,8 +127,8 @@
         <option value="$PROJECT_DIR$/JMSSGraphics/Pong.py" />
         <option value="E:/Python 3.5/Lib/site-packages/pyglet/window/win32/__init__.py" />
         <option value="$PROJECT_DIR$/JMSSGraphics/TextBounce.py" />
-        <option value="$PROJECT_DIR$/JMSSGraphics/JMSSGraphics_pyglet.py" />
         <option value="$PROJECT_DIR$/JMSSGraphics/JMSSPong.py" />
+        <option value="$PROJECT_DIR$/JMSSGraphics/JMSSGraphics_pyglet.py" />
       </list>
     </option>
   </component>
@@ -462,7 +462,21 @@
       <option name="project" value="LOCAL" />
       <updated>1516236662638</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="updating drawing function">
+      <created>1516279934340</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1516279934340</updated>
+    </task>
+    <task id="LOCAL-00010" summary="adding sound and music resources">
+      <created>1516279997301</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1516279997301</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -534,7 +548,9 @@
     <MESSAGE value="updating draw functions" />
     <MESSAGE value="added audio support" />
     <MESSAGE value="added audio support with looping" />
-    <option name="LAST_COMMIT_MESSAGE" value="added audio support with looping" />
+    <MESSAGE value="updating drawing function" />
+    <MESSAGE value="adding sound and music resources" />
+    <option name="LAST_COMMIT_MESSAGE" value="adding sound and music resources" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -545,7 +561,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="20" />
+      <option name="time" value="21" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -835,8 +851,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/JMSSGraphics/JMSSPong.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="462">
-          <caret line="134" column="58" lean-forward="false" selection-start-line="134" selection-start-column="58" selection-end-line="134" selection-end-column="58" />
+        <state relative-caret-position="418">
+          <caret line="15" column="12" lean-forward="false" selection-start-line="15" selection-start-column="12" selection-end-line="15" selection-end-column="12" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>
@@ -845,8 +861,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/JMSSGraphics/JMSSGraphics_pyglet.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="332" column="30" lean-forward="true" selection-start-line="332" selection-start-column="30" selection-end-line="332" selection-end-column="30" />
+        <state relative-caret-position="22">
+          <caret line="257" column="0" lean-forward="false" selection-start-line="257" selection-start-column="0" selection-end-line="257" selection-end-column="0" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>

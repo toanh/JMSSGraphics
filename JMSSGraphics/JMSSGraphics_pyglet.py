@@ -249,9 +249,9 @@ class JMSSPygletApp(pyglet.window.Window):
 
 
 class Graphics:
-    def __init__(self, w, h, title = "", fps = 60):
-        self.width = w
-        self.height = h
+    def __init__(self, width, height, title = "", fps = 60):
+        self.width = width
+        self.height = height
         self.title = title
         self.done = False
         self.fps = fps
@@ -325,9 +325,12 @@ class Graphics:
         label.draw()
 
     def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=None, rect=None):
-        sprite = pyglet.sprite.Sprite(image)
-        sprite.x = x + anchorX
-        sprite.y = y + anchorY
+        if (isinstance(image, str)):
+            image = self.loadImage(image)
+            sprite = pyglet.sprite.Sprite(image)
+        else:
+            sprite = pyglet.sprite.Sprite(image)
+
         if width is not None:
             sprite.scale_x =  width * 1.0 / sprite.width
         if height is not None:
@@ -336,10 +339,20 @@ class Graphics:
         anchor_x = image.anchor_x
         anchor_y = image.anchor_y
 
+        dx = 0
+        dy = 0
+
         if anchorX is not None:
-            image.anchor_x = anchorX
+            dx = anchorX * image.width * sprite.scale_x
+            image.anchor_x = anchorX * image.width
+
+
         if anchorY is not None:
-            image.anchor_y = anchorY
+            dy = anchorY * image.height * sprite.scale_y
+            image.anchor_y = anchorY * image.height
+
+        sprite.x = x + dx
+        sprite.y = y + dy
 
         if opacity is not None:
             sprite.opacity = int(opacity * 255)
