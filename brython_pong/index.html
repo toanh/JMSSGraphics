@@ -1,0 +1,48 @@
+<html>
+<head>
+<script src="brython.js"></script>
+<script src="brython_stdlib.js"></script>
+</head>
+<body onLoad="brython(1)">
+<script type="text/python" src="win_screen.py">
+<script type="text/python">
+'''
+from JMSSGraphics_brython import *
+from math import pi
+
+jmss = Graphics(200, 200, "Testing")
+
+img = jmss.loadImage("player.png")
+
+x = 50
+y = 0
+
+@jmss.mainloop
+def main():
+	global img, x, y
+	jmss.clear()
+	ctx = doc["canvas"].getContext('2d')
+	ctx.beginPath()
+	ctx.arc(100, 100, 20, 0, pi*2)
+	ctx.closePath()
+	ctx.fill()
+
+
+	if (jmss.isKeyDown(KEY_S)):
+		x = x - 2
+	if (jmss.isKeyDown(KEY_W)):
+		x = x + 2
+	if (jmss.isKeyDown(KEY_UP)):
+		y = y + 2
+	if (jmss.isKeyDown(KEY_DOWN)):
+		y = y - 2
+
+	jmss.drawImage(img, x, y)
+
+
+jmss.run()
+'''
+</script>
+</body>
+
+</html>
