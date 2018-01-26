@@ -33,7 +33,7 @@ title_image = jmss.loadImage("title.png")
 blip_sound = jmss.loadSound("blip.wav", streaming = False)
 background_music = jmss.loadSound("piano.wav", streaming = True)
 
-jmss.playSound(background_music, loop = True)
+#jmss.playSound(background_music, loop = True)
 
 #The main loop code is below, this gets run once per frame
 @jmss.mainloop
@@ -150,8 +150,8 @@ def Game():
                 
 
             #Code to draw my game
-            jmss.clear()
-            jmss.drawImage(background_image, x = 0, y = 0)
+            jmss.clear(1, 0, 0, 1)
+            #jmss.drawImage(background_image, x = 0, y = 0)
             #the order of drawing means that the paddle is drawn first and
             #will be covered up by the ball if they overlap
             jmss.drawImage(paddle1_image, x = paddle1_xpos, y = paddle1_ypos)

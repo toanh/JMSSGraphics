@@ -147,7 +147,7 @@ KEY_LOPTION       = 0xffef
 KEY_ROPTION       = 0xfff0
 
 # Latin-1
-KEY_SPACE         = 0x020
+KEY_SPACE         = 32
 KEY_EXCLAMATION   = 0x021
 KEY_DOUBLEQUOTE   = 0x022
 KEY_HASH          = 0x023
@@ -189,31 +189,31 @@ KEY_UNDERSCORE    = 0x05f
 KEY_GRAVE         = 0x060
 KEY_QUOTELEFT     = 0x060
 KEY_A             = 65
-KEY_B             = 0x062
-KEY_C             = 0x063
-KEY_D             = 0x064
-KEY_E             = 0x065
-KEY_F             = 0x066
-KEY_G             = 0x067
-KEY_H             = 0x068
-KEY_I             = 0x069
-KEY_J             = 0x06a
-KEY_K             = 0x06b
-KEY_L             = 0x06c
-KEY_M             = 0x06d
-KEY_N             = 0x06e
-KEY_O             = 0x06f
-KEY_P             = 0x070
-KEY_Q             = 0x071
-KEY_R             = 0x072
+KEY_B             = 66
+KEY_C             = 67
+KEY_D             = 68
+KEY_E             = 69
+KEY_F             = 70
+KEY_G             = 71
+KEY_H             = 72
+KEY_I             = 73
+KEY_J             = 74
+KEY_K             = 75
+KEY_L             = 76
+KEY_M             = 77
+KEY_N             = 78
+KEY_O             = 79
+KEY_P             = 80
+KEY_Q             = 81
+KEY_R             = 82
 KEY_S             = 83
 KEY_T             = 84
 KEY_U             = 85
 KEY_V             = 86
 KEY_W             = 87
-KEY_X             = 0x078
-KEY_Y             = 0x079
-KEY_Z             = 0x07a
+KEY_X             = 88
+KEY_Y             = 89
+KEY_Z             = 90
 KEY_BRACELEFT     = 0x07b
 KEY_BAR           = 0x07c
 KEY_BRACERIGHT    = 0x07d
@@ -313,7 +313,7 @@ class Graphics:
         self.draw_func = func
 
     def clear(self, r = 0, g = 0, b = 0, a = 1):
-        #self.ctx.fillStyle("white")
+        self.ctx.fillStyle= "rgba(" + str(int(r * 255.0)) + "," + str(int(g * 255.0)) + "," + str(int(b * 255.0)) + "," + str(int(a * 255.0))+ ")"
         self.ctx.fillRect(0, 0, self.width, self.height)
 
     def setFPS(self, fps):
