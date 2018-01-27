@@ -219,41 +219,11 @@ KEY_BAR           = 0x07c
 KEY_BRACERIGHT    = 0x07d
 KEY_ASCIITILDE    = 0x07e
 
-
-class JMSSPygletApp():
-    def __init__(self, fps, graphics, *args, **kwargs):
-        super(JMSSPygletApp, self).__init__(width=graphics.width,
-                                   height=graphics.height, caption=graphics.title,
-                                   *args,
-                                   **kwargs)
-
-        self.keys = dict([(a, False) for a in range(255)] +
-                         [(a, False) for a in range(0xff00, 0xffff)])
-        
-
-        self.graphics = graphics
-        self.draw_func = None
-        self.init_func = None
-
-        pyglet.gl.glClearColor(0.5, 0, 0, 1)
-        self.fps = fps
-
-    def start(self):
-        if (self.init_func is not None):
-            self.init_func()
-        pyglet.clock.schedule_interval(self.mainloop, 1.0 / self.fps)
-        pyglet.clock.set_fps_limit(self.fps)
-
-    def mainloop(self, *args, **kwargs):
-        #self.graphics.update()
-        if (self.draw_func is not None):
-            self.draw_func()
-
-    def on_key_press(self, symbol, modifiers):
-        self.keys[symbol] = True
-
-    def on_key_release(self, symbol, modifiers):
-        self.keys[symbol] = False
+class JMSSImage():
+    def __init__(self, image):
+        self.img = image
+        self.height = image.naturalHeight
+        self.width = image.naturalWidth
 
 class Graphics:
     def _keydown(self, ev):
@@ -320,14 +290,7 @@ class Graphics:
         self.fps = fps
 
     def loadImage(self, file):
-        return html.IMG(src = file)
-
-    def createSprite(self, image):
-        # if the filename is supplied, create an image and autocreate the sprite
-        if (isinstance(image, str)):
-            return pyglet.sprite.Sprite(self.loadImage(image))
-        else:
-            return pyglet.sprite.Sprite(image)
+        return JMSSImage(html.IMG(src = file))
 
     def isKeyDown(self, key):
         return self.keys[key]
@@ -355,13 +318,15 @@ class Graphics:
             self.soundPlayers[sound].pause()
 
     def drawText(self, text, x, y, fontName = "Arial", fontSize = 10, color = (1, 1, 1, 1), anchorX = "left", anchorY ="bottom"):
-        label = pyglet.text.Label(text, color = self._convColor(color), font_name=fontName, font_size=fontSize, x = x, y = y, anchor_x = anchorX, anchor_y = anchorY)
-        label.draw()
+        self.ctx.fillStyle = "rgba(" + str(int(color[0] * 255.0)) + "," + str(int(color[1] * 255.0)) + "," + str(int(color[2] * 255.0)) + "," + str(int(color[3] * 255.0)) + ")"
+        self.ctx.font = str(fontSize) + "pt " + fontName
+        self.ctx.textBaseline = "bottom"
+        self.ctx.fillText(text, x, self.height - y)
 
     def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=None, rect=None):
         if (isinstance(image, str)):
             image = self.loadImage(image)
-        self.ctx.drawImage(image, x, self._convY(y + image.naturalHeight) )
+        self.ctx.drawImage(image.img, x, self._convY(y + image.height) )
 
     def drawCircle(self, color, pos, radius, width = 0):
         pygame.draw.circle(self.screen, color, self._conv(pos), radius, width)
