@@ -14,7 +14,7 @@ KEY_PAUSE         = 0xff13
 KEY_SCROLLLOCK    = 0xff14
 KEY_SYSREQ        = 0xff15
 KEY_ESCAPE        = 0xff1b
-KEY_KEY_SPACE         = 0xff20
+KEY_SPACE         = 0xff20
 
 # Cursor control and motion
 KEY_HOME          = 0xff50

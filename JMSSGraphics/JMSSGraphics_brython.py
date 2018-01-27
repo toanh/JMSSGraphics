@@ -219,6 +219,12 @@ KEY_BAR           = 0x07c
 KEY_BRACERIGHT    = 0x07d
 KEY_ASCIITILDE    = 0x07e
 
+class JMSSImage():
+    def __init__(self, image):
+        self.img = image
+        self.height = image.naturalHeight
+        self.width = image.naturalWidth
+
 
 class JMSSPygletApp():
     def __init__(self, fps, graphics, *args, **kwargs):
@@ -320,14 +326,7 @@ class Graphics:
         self.fps = fps
 
     def loadImage(self, file):
-        return html.IMG(src = file)
-
-    def createSprite(self, image):
-        # if the filename is supplied, create an image and autocreate the sprite
-        if (isinstance(image, str)):
-            return pyglet.sprite.Sprite(self.loadImage(image))
-        else:
-            return pyglet.sprite.Sprite(image)
+        return JMSSImage(html.IMG(src = file))
 
     def isKeyDown(self, key):
         return self.keys[key]
@@ -361,7 +360,7 @@ class Graphics:
     def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=None, rect=None):
         if (isinstance(image, str)):
             image = self.loadImage(image)
-        self.ctx.drawImage(image, x, self._convY(y + image.naturalHeight) )
+        self.ctx.drawImage(image.img, x, self._convY(y + image.img.naturalHeight) )
 
     def drawCircle(self, color, pos, radius, width = 0):
         pygame.draw.circle(self.screen, color, self._conv(pos), radius, width)

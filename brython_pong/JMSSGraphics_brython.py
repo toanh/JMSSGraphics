@@ -24,9 +24,9 @@ KEY_KEY_SPACE         = 0xff20
 
 # Cursor control and motion
 KEY_HOME          = 0xff50
-KEY_LEFT          = 0xff51
+KEY_LEFT          = 37
 KEY_UP            = 38
-KEY_RIGHT         = 0xff53
+KEY_RIGHT         = 39
 KEY_DOWN          = 40
 KEY_PAGEUP        = 0xff55
 KEY_PAGEDOWN      = 0xff56
@@ -326,7 +326,13 @@ class Graphics:
     def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=None, rect=None):
         if (isinstance(image, str)):
             image = self.loadImage(image)
-        self.ctx.drawImage(image.img, x, self._convY(y + image.height) )
+        self.ctx.save()
+        if opacity is not None:
+            self.ctx.globalAlpha = opacity
+            self.ctx.drawImage(image.img, x, self._convY(y + image.height) )
+            self.ctx.restore()
+        else:
+            self.ctx.drawImage(image.img, x, self._convY(y + image.height))
 
     def drawCircle(self, color, pos, radius, width = 0):
         pygame.draw.circle(self.screen, color, self._conv(pos), radius, width)
@@ -335,11 +341,12 @@ class Graphics:
         self.screen.set_at(self._conv(pos), color)
 
     def drawLine(self, x1, y1, x2, y2, r = 1.0, g = 1.0, b = 1.0, a = 1.0, width = 1):
-        pyglet.gl.glLineWidth(width)
-        pyglet.gl.glColor4f(r, g, b, a)
-        pyglet.graphics.draw(2, pyglet.gl.GL_LINES, 
-            ("v2f", (x1, y1, x2, y2))
-        )
+        self.ctx.beginPath()
+        self.ctx.lineWidth = width
+        self.ctx.strokeStyle = "rgba(" + str(int(r * 255.0)) + "," + str(int(g * 255.0)) + "," + str(int(b * 255.0)) + "," + str(int(a * 255.0)) + ")"
+        self.ctx.moveTo(x1, self._convY(y1))
+        self.ctx.lineTo(x2, self._convY(y2))
+        self.ctx.stroke()
 
     def drawRect(self, color, rect, width = 0, rotation = 0, pivot = None):
 
