@@ -265,6 +265,8 @@ class Graphics:
 
         self.soundPlayers = {}
 
+        self.loadingResources = 0
+
     def run(self):
         timer.set_interval(self.draw_func, 1000 * 1.0 / 60.0)
 
@@ -289,8 +291,20 @@ class Graphics:
     def setFPS(self, fps):
         self.fps = fps
 
+    def resourceLoaded(self, e):
+        self.loadingResources -= 1
+        e.target.jmssImg.height = e.target.naturalHeight
+        e.target.jmssImg.width = e.target.naturalWidth
+        #print(e.target.jmssImg.height)
+        #print(self.loadingResources)
+
     def loadImage(self, file):
-        return JMSSImage(html.IMG(src = file))
+        self.loadingResources += 1
+        img = html.IMG(src = file)
+        img.bind('load', self.resourceLoaded)
+        jmssImg = JMSSImage(img)
+        img.jmssImg = jmssImg
+        return jmssImg
 
     def isKeyDown(self, key):
         return self.keys[key]
@@ -318,6 +332,8 @@ class Graphics:
             self.soundPlayers[sound].pause()
 
     def drawText(self, text, x, y, fontName = "Arial", fontSize = 10, color = (1, 1, 1, 1), anchorX = "left", anchorY ="bottom"):
+        if self.loadingResources > 0:
+            return
         self.ctx.fillStyle = "rgba(" + str(int(color[0] * 255.0)) + "," + str(int(color[1] * 255.0)) + "," + str(int(color[2] * 255.0)) + "," + str(int(color[3] * 255.0)) + ")"
         self.ctx.font = str(fontSize) + "pt " + fontName
         self.ctx.textBaseline = "bottom"
@@ -326,6 +342,8 @@ class Graphics:
     def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=None, rect=None):
         if (isinstance(image, str)):
             image = self.loadImage(image)
+        if self.loadingResources > 0:
+            return
         self.ctx.save()
         if opacity is not None:
             self.ctx.globalAlpha = opacity
