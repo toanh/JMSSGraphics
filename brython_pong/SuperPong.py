@@ -1,4 +1,4 @@
-from JMSSGraphics_brython import *
+from JMSSGraphics import *
 
 from random import *
 import math
