@@ -1,6 +1,8 @@
 import pyglet
 import math
 
+from pyglet.window import mouse
+
 # Key symbol constants
 
 # ASCII commands
@@ -213,6 +215,11 @@ KEY_BAR           = 0x07c
 KEY_BRACERIGHT    = 0x07d
 KEY_ASCIITILDE    = 0x07e
 
+MOUSE_BUTTON_NONE   = 0
+MOUSE_BUTTON_LEFT   = 1
+MOUSE_BUTTON_RIGHT  = 2
+MOUSE_BUTTON_MIDDLE = 3
+
 
 class JMSSPygletApp(pyglet.window.Window):
     def __init__(self, fps, graphics, *args, **kwargs):
@@ -232,6 +239,16 @@ class JMSSPygletApp(pyglet.window.Window):
         pyglet.gl.glClearColor(0.5, 0, 0, 1)
         self.fps = fps
 
+        self.mouse_x = 0
+        self.mouse_y = 0
+        self.mouse_dx = 0
+        self.mouse_dy = 0
+
+        self.mouse_button_pressed = MOUSE_BUTTON_NONE
+        self.mouse_button_released = MOUSE_BUTTON_NONE
+
+        #self.set_mouse_visible(False)
+
     def start(self):
         if (self.init_func is not None):
             self.init_func()
@@ -248,6 +265,41 @@ class JMSSPygletApp(pyglet.window.Window):
 
     def on_key_release(self, symbol, modifiers):
         self.keys[symbol] = False
+
+    def on_mouse_motion(self, x, y, dx, dy):
+        self.mouse_x = x
+        self.mouse_y = y
+        self.mouse_dx = dx
+        self.mouse_dy = dy
+
+    # TODO: implement multiple mouse button press and release in a list
+    # currently only 1 button's state is stored at a time
+    def on_mouse_press(self, x, y, button, modifiers):
+        self.mouse_x = x
+        self.mouse_y = y
+
+        if button == pyglet.window.mouse.LEFT:
+            self.mouse_button_pressed = MOUSE_BUTTON_LEFT
+            self.mouse_button_released = MOUSE_BUTTON_NONE
+        elif button == pyglet.window.mouse.MIDDLE:
+            self.mouse_button_pressed = MOUSE_BUTTON_MIDDLE
+            self.mouse_button_released = MOUSE_BUTTON_NONE
+        elif button == pyglet.window.mouse.RIGHT:
+            self.mouse_button_pressed = MOUSE_BUTTON_RIGHT
+            self.mouse_button_released = MOUSE_BUTTON_NONE
+
+    def on_mouse_release(self, x, y, button, modifiers):
+        self.mouse_x = x
+        self.mouse_y = y
+        if button == pyglet.window.mouse.LEFT:
+            self.mouse_button_released = MOUSE_BUTTON_LEFT
+            self.mouse_button_pressed = MOUSE_BUTTON_NONE
+        elif button == pyglet.window.mouse.MIDDLE:
+            self.mouse_button_released = MOUSE_BUTTON_MIDDLE
+            self.mouse_button_pressed = MOUSE_BUTTON_NONE
+        elif button == pyglet.window.mouse.RIGHT:
+            self.mouse_button_released = MOUSE_BUTTON_RIGHT
+            self.mouse_button_pressed = MOUSE_BUTTON_NONE
 
 class Graphics:
     def __init__(self, width, height, title = "", fps = 60):
@@ -298,6 +350,18 @@ class Graphics:
 
     def isKeyDown(self, key):
         return self.app.keys[key]
+
+    def isMousePressed(self, key):
+        return self.app.mouse_button_pressed == key
+
+    def isMouseReleased(self, key):
+        return self.app.mouse_button_released == key
+
+    def getMousePos(self):
+        return (self.app.mouse_x, self.app.mouse_y)
+
+    def getMouseDelta(self):
+        return (self.app.mouse_dx, self.app.mouse_dy)
 
     def _convColor(self, c):
         return (int(c[0] * 255.0), int(c[1] * 255.0), int(c[2] * 255.0), int(c[3] * 255.0))
