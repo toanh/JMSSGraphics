@@ -431,18 +431,19 @@ class Graphics:
         image.anchor_x = anchor_x
         image.anchor_y = anchor_y
 
-    def drawCircle(self, color, pos, radius, width = 0):
-        pygame.draw.circle(self.screen, color, self._conv(pos), radius, width)
-
-    def drawPixel(self, pos, color):
-        self.screen.set_at(self._conv(pos), color)
-
     def drawLine(self, x1, y1, x2, y2, r = 1.0, g = 1.0, b = 1.0, a = 1.0, width = 1):
         pyglet.gl.glLineWidth(width)
         pyglet.gl.glColor4f(r, g, b, a)
         pyglet.graphics.draw(2, pyglet.gl.GL_LINES, 
             ("v2f", (x1, y1, x2, y2))
         )
+'''
+    def drawCircle(self, color, pos, radius, width = 0):
+        pygame.draw.circle(self.screen, color, self._conv(pos), radius, width)
+
+
+    def drawPixel(self, pos, color):
+        self.screen.set_at(self._conv(pos), color)
 
     def drawRect(self, color, rect, width = 0, rotation = 0, pivot = None):
 
@@ -483,4 +484,4 @@ class Graphics:
         else:
             pygame.draw.rect(self.screen, color, pygame.Rect(self._conx(rect[0]), self._cony(rect[1]), rect[2], rect[3]), width)
 
-
+'''
