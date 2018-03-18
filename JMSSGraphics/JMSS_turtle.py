@@ -155,16 +155,15 @@ class Graphics:
             fps - how many frames per second to run the main update loop
         Returns:   None
     """
-
-    def __init__(self, w, h, title="", fps=60):
-        self.width = w
-        self.height = h
+    def __init__(self, width, height, title = "", fps = 60, fullscreen = False):
+        self.width = width
+        self.height = height
         self.done = False
         self.fps = fps
 
         self.listeners = []
 
-        turtle.screensize(w, h)
+        turtle.screensize(width, height)
 
         # pygame.init()
         # self.screen = pygame.display.set_mode((self.width, self.height))
@@ -219,7 +218,13 @@ class Graphics:
             None
     """
 
-    def run(self, mainloop=None, *args):
+    def init(self, func):
+        self.init_func = func
+
+    def mainloop(self, func):
+        self.draw_func = func
+
+    def run(self):
         turtle.ht()
         turtle.tracer(0, 0)
         while not self.done:
@@ -232,25 +237,11 @@ class Graphics:
                 for l in self.listeners:
                     l(event)
             """
-            if (mainloop is not None):
-                if (len(args) > 0):
-                    mainloop(args)
-                else:
-                    mainloop()
+            if (self.draw_func is not None):
+                self.draw_func()
 
-                    # c = pygame.time.Clock().tick(self.fps)
-                    # pygame.display.flip()
         turtle.update()
         turtle.ontimer(self.run, int(1 / self.fps * 1000))
-
-    """
-    The below functions perform conversions between coordinate spaces.
-    These are not designed to be called externally.
-    The _ prefix is used to denote internal functions.
-    """
-
-    def _convCol(self, c):
-        return [c[0] / 255, c[1] / 255, c[2] / 255]
 
     """
     Loads an image from disk and returns it as an object to be used in the drawImage() function
@@ -271,8 +262,8 @@ class Graphics:
             The image object
     """
 
-    def clear(self, color=(0, 0, 0)):
-        turtle.bgcolor(self._convCol(color))
+    def clear(self, r = 0, g = 0, b = 0, a = 1):
+        turtle.bgcolor([r, g, b])
         turtle.clear()
 
     """
@@ -285,6 +276,11 @@ class Graphics:
 
     def getMousePos(self):
         return self._invconv(pygame.mouse.get_pos())
+
+    def loadImage(self, file):
+        turtle.register_shape(file)
+        return file
+
 
     """
     Draws an image on the screen. The image must first be loaded in using loadImage().
@@ -300,23 +296,12 @@ class Graphics:
         Returns:
             None
     """
-
-    def drawImage(self, image, pos, rotation=0, pivot=None, alpha=None, scale=None, rect=None):
-        temp = image
-
-        if (alpha is not None):
-            temp = image.copy()
-            temp.fill((255, 255, 255, alpha), None, pygame.BLEND_RGBA_MULT)
-
-        if (scale is not None):
-            temp = pygame.transform.scale(temp, scale)
-
-        if (pivot is None):
-            pivot = temp.get_rect().center
-        temp = pygame.transform.rotate(temp, rotation)
-        temp.get_rect().center = pivot
-
-        self.screen.blit(temp, self._conv(pos), rect)
+    def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=None, rect=None):
+        turtle.pu()
+        turtle.shape(image)
+        turtle.setpos((x,y))
+        turtle.pd()
+        turtle.stamp()
 
     """
     Draws a circle on the screen.
@@ -349,59 +334,6 @@ class Graphics:
 
     def drawPixel(self, color, pos):
         self.screen.set_at(self._conv(pos), color)
-
-    """
-    Draws a rectangle on the screen.
-        Arguments:
-            color - the rectangle's colour. Color format is RGB: (255,255,255)
-            rect - a (x, y, width, height) rectangle specifying the rectangle to draw on the screen
-            width - the width of the outline of the rectangle. For a filled rectangle, set this to 0
-            rotation - (optional) the angle of rotation to be applied to the rectangle
-            pivot - (optional) the pivot point of the rotation. This will be the top left hand corner by default.
-        Returns:
-            None
-    """
-
-    def drawRect(self, color, rect, width=0, rotation=0, pivot=None):
-
-        if (rotation != 0):
-            points = []
-            points.append([rect[0], rect[1]])
-            points.append([rect[0] + rect[2], rect[1]])
-            points.append([rect[0] + rect[2], rect[1] + rect[3]])
-            points.append([rect[0], rect[1] + rect[3]])
-
-            for point in points:
-                if (pivot is None):
-                    point[0] -= rect[0]
-                    point[1] -= rect[1]
-                else:
-                    point[0] -= pivot[0]
-                    point[1] -= pivot[1]
-
-            rotated = []
-            for i in range(0, len(points)):
-                rotatedPt = [0, 0]
-                rotatedPt[0] = points[i][0] * math.cos(rotation) - points[i][1] * math.sin(rotation)
-                rotatedPt[1] = points[i][0] * math.sin(rotation) + points[i][1] * math.cos(rotation)
-                rotated.append(rotatedPt)
-
-            for point in rotated:
-                if (pivot is None):
-                    point[0] += rect[0]
-                    point[1] += rect[1]
-                else:
-                    point[0] += pivot[0]
-                    point[1] += pivot[1]
-
-                point[0] = self._conx(point[0])
-                point[1] = self._cony(point[1])
-
-            pygame.draw.polygon(self.screen, color, rotated, width)
-        else:
-            pygame.draw.rect(self.screen, color,
-                             pygame.Rect(self._conx(rect[0]), self._cony(rect[1]), rect[2], rect[3]), width)
-
 
 ##################################################################################################################################
 
