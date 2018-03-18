@@ -394,7 +394,7 @@ class Graphics:
             turtle.shape(self.loadImage(image))
         finally:
             turtle.pu()
-            turtle.setpos(self._convXY(x - int(turtle.width()/2),y - int(turtle.height()/2)))
+            turtle.setpos(self._convXY(x - int(turtle.width()/2),y - int(turtle.width()/2)))
             turtle.pd()
             turtle.stamp()
 
