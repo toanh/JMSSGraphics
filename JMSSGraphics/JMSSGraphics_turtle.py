@@ -388,11 +388,16 @@ class Graphics:
             None
     """
     def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=None, rect=None):
-        turtle.pu()
-        turtle.shape(image)
-        turtle.setpos(self._convXY(x,y))
-        turtle.pd()
-        turtle.stamp()
+        try:
+            turtle.shape(image)
+        except turtle.TurtleGraphicsError as e:
+            turtle.shape(self.loadImage(image))
+        finally:
+            turtle.pu()
+            turtle.setpos(self._convXY(x - int(turtle.width()/2),y - int(turtle.height()/2)))
+            turtle.pd()
+            turtle.stamp()
+
 
     """
     Draws a circle on the screen.
