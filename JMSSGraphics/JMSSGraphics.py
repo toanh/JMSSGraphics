@@ -225,6 +225,8 @@ class JMSSPygletApp(pyglet.window.Window):
     def __init__(self, fps, graphics, *args, **kwargs):
         super(JMSSPygletApp, self).__init__(width=graphics.width,
                                    height=graphics.height, caption=graphics.title,
+                                   fullscreen = graphics.fullscreen,
+                                   vsync = True,
                                    *args,
                                    **kwargs)
 
@@ -255,10 +257,10 @@ class JMSSPygletApp(pyglet.window.Window):
         pyglet.clock.schedule_interval(self.mainloop, 1.0 / self.fps)
         pyglet.clock.set_fps_limit(self.fps)
 
-    def mainloop(self, *args, **kwargs):
+    def mainloop(self, dt, *args, **kwargs):
         #self.graphics.update()
         if (self.draw_func is not None):
-            self.draw_func()
+            self.draw_func(dt)
 
     def on_key_press(self, symbol, modifiers):
         self.keys[symbol] = True
@@ -302,7 +304,7 @@ class JMSSPygletApp(pyglet.window.Window):
             self.mouse_button_pressed = MOUSE_BUTTON_NONE
 
 class Graphics:
-    def __init__(self, width, height, title = "", fps = 60):
+    def __init__(self, width, height, title = "", fps = 60, fullscreen = False):
         self.width = width
         self.height = height
         self.title = title
@@ -314,9 +316,11 @@ class Graphics:
         self.draw_func = None
         self.update_func = None
 
-        self.app = JMSSPygletApp(fps, self)
-
         self.soundPlayers = {}
+
+        self.fullscreen = fullscreen
+
+        self.app = JMSSPygletApp(fps, self)
 
     def run(self):
         self.app.start()

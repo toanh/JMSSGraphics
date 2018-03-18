@@ -1,6 +1,6 @@
 import random
 
-from JMSSGraphics.JMSSGraphics_pyglet import *
+from JMSSGraphics import *
 
 bg_sprite = None
 
@@ -129,7 +129,7 @@ def update():
     p1_score.text = str(player1_sprite.score)
     p2_score.text = str(player2_sprite.score)
 
-jmss = Graphics(800, 600, "Pong!")
+jmss = Graphics(800, 600, "Pong!", fullscreen = False)
 
 @jmss.mainloop
 def game():
