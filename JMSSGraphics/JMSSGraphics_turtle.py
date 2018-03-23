@@ -216,6 +216,9 @@ MOUSE_BUTTON_LEFT   = 1
 MOUSE_BUTTON_RIGHT  = 2
 MOUSE_BUTTON_MIDDLE = 3
 
+from tkinter import PhotoImage
+import tkinter as tk
+
 """
 A simple graphics wrapper around PyGame.
 It redefines the coordinate system to be like the Secondary School level cartesian axes.
@@ -240,22 +243,31 @@ class Graphics:
 
         self.listeners = []
 
-        turtle.screensize(width, height)
+        root = tk.Tk()
+        canvas = tk.Canvas(master=root, width=width, height=height)
+        canvas.pack()
+
+        self.t = turtle.RawTurtle(canvas)
+        self.screen = self.t.getscreen()
+
+        #turtle.screensize(width, height)
 
         self.keys = dict([(a, False) for a in range(255)] +
                          [(a, False) for a in range(0xff00, 0xffff)])
 
-        turtle.onkeypress(self._onKeyPressed_Down, "Down")
-        turtle.onkeypress(self._onKeyPressed_Up, "Up")
-        turtle.onkeypress(self._onKeyPressed_Left, "Left")
-        turtle.onkeypress(self._onKeyPressed_Right, "Right")
+        self.images = {}
 
-        turtle.onkeyrelease(self._onKeyReleased_Down, "Down")
-        turtle.onkeyrelease(self._onKeyReleased_Up, "Up")
-        turtle.onkeyrelease(self._onKeyReleased_Left, "Left")
-        turtle.onkeyrelease(self._onKeyReleased_Right, "Right")
+        self.screen.onkeypress(self._onKeyPressed_Down, "Down")
+        self.screen.onkeypress(self._onKeyPressed_Up, "Up")
+        self.screen.onkeypress(self._onKeyPressed_Left, "Left")
+        self.screen.onkeypress(self._onKeyPressed_Right, "Right")
 
-        turtle.listen()
+        self.screen.onkeyrelease(self._onKeyReleased_Down, "Down")
+        self.screen.onkeyrelease(self._onKeyReleased_Up, "Up")
+        self.screen.onkeyrelease(self._onKeyReleased_Left, "Left")
+        self.screen.onkeyrelease(self._onKeyReleased_Right, "Right")
+
+        self.screen.listen()
         # pygame.init()
         # self.screen = pygame.display.set_mode((self.width, self.height))
         # pygame.display.set_caption(title)
@@ -315,8 +327,8 @@ class Graphics:
         self.draw_func = func
 
     def run(self):
-        turtle.ht()
-        turtle.tracer(0, 0)
+        self.t.ht()
+        self.screen.tracer(0, 0)
         while not self.done:
             """
             for event in pygame.event.get():
@@ -330,9 +342,9 @@ class Graphics:
             if (self.draw_func is not None):
                 self.draw_func()
 
-        turtle.update()
-        turtle.listen()
-        turtle.ontimer(self.run, int(1 / self.fps * 1000))
+        self.screen.update()
+        self.screen.listen()
+        self.screen.ontimer(self.run, int(1 / self.fps * 1000))
 
     """
     Loads an image from disk and returns it as an object to be used in the drawImage() function
@@ -342,8 +354,6 @@ class Graphics:
             The image object
     """
 
-    def loadImage(self, file):
-        return pygame.image.load(file).convert_alpha()
 
     """
     Clears the screen with an optional colour.
@@ -354,8 +364,8 @@ class Graphics:
     """
 
     def clear(self, r = 0, g = 0, b = 0, a = 1):
-        turtle.bgcolor([r, g, b])
-        turtle.clear()
+        self.screen.bgcolor([r, g, b])
+        self.t.clear()
 
     """
     Gets the current mouse position
@@ -369,7 +379,11 @@ class Graphics:
         return self._invconv(pygame.mouse.get_pos())
 
     def loadImage(self, file):
-        turtle.register_shape(file)
+        image = PhotoImage(file=file)
+
+        self.screen.register_shape(file, turtle.Shape("image", image))
+
+        self.images[file] = image
         return file
 
 
@@ -389,14 +403,14 @@ class Graphics:
     """
     def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=None, rect=None):
         try:
-            turtle.shape(image)
+            self.t.shape(image)
         except turtle.TurtleGraphicsError as e:
-            turtle.shape(self.loadImage(image))
+            self.t.shape(self.loadImage(image))
         finally:
-            turtle.pu()
-            turtle.setpos(self._convXY(x - int(turtle.width()/2),y - int(turtle.width()/2)))
-            turtle.pd()
-            turtle.stamp()
+            self.t.pu()
+            self.t.setpos(self._convXY(x + int(self.images[image].width()/2),y + int(self.images[image].height()/2)))
+            self.t.pd()
+            self.t.stamp()
 
 
     """
