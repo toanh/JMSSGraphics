@@ -249,6 +249,8 @@ class JMSSPygletApp(pyglet.window.Window):
         self.mouse_button_pressed = MOUSE_BUTTON_NONE
         self.mouse_button_released = MOUSE_BUTTON_NONE
 
+        self.batch = pyglet.graphics.Batch()
+
         #self.set_mouse_visible(False)
 
     def start(self):
@@ -259,8 +261,11 @@ class JMSSPygletApp(pyglet.window.Window):
 
     def mainloop(self, dt, *args, **kwargs):
         #self.graphics.update()
+        self.sprites = []
         if (self.draw_func is not None):
-            self.draw_func(dt)
+            self.draw_func()
+
+            self.batch.draw()
 
     def on_key_press(self, symbol, modifiers):
         self.keys[symbol] = True
@@ -399,9 +404,9 @@ class Graphics:
     def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=None, rect=None):
         if (isinstance(image, str)):
             image = self.loadImage(image)
-            sprite = pyglet.sprite.Sprite(image)
+            sprite = pyglet.sprite.Sprite(image, batch = self.app.batch)
         else:
-            sprite = pyglet.sprite.Sprite(image)
+            sprite = pyglet.sprite.Sprite(image, batch = self.app.batch)
 
         if width is not None:
             sprite.scale_x =  width * 1.0 / sprite.width
@@ -430,7 +435,9 @@ class Graphics:
             sprite.opacity = int(opacity * 255)
 
         sprite.rotation = rotation
-        sprite.draw()
+        #sprite.draw()
+
+        self.app.sprites.append(sprite)
 
         image.anchor_x = anchor_x
         image.anchor_y = anchor_y

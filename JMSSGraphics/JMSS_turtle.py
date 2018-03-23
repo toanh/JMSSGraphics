@@ -1,141 +1,220 @@
 import turtle
 import math
 
-"""
-A simple turtle class that uses PyGame. Implements instantaneous
-rendering, ie. no animated drawing or turning
-"""
+# ASCII commands
+KEY_BACKSPACE     = 0xff08
+KEY_TAB           = 0xff09
+KEY_LINEFEED      = 0xff0a
+KEY_CLEAR         = 0xff0b
+KEY_RETURN        = 0xff0d
+KEY_ENTER         = 0xff0d      # synonym
+KEY_PAUSE         = 0xff13
+KEY_SCROLLLOCK    = 0xff14
+KEY_SYSREQ        = 0xff15
+KEY_ESCAPE        = 0xff1b
+KEY_SPACE         = 0xff20
 
+# Cursor control and motion
+KEY_HOME          = 0xff50
+KEY_LEFT          = 0xff51
+KEY_UP            = 0xff52
+KEY_RIGHT         = 0xff53
+KEY_DOWN          = 0xff54
+KEY_PAGEUP        = 0xff55
+KEY_PAGEDOWN      = 0xff56
+KEY_END           = 0xff57
+KEY_BEGIN         = 0xff58
 
-class Turtle:
-    """
-    DO NOT instantiate directly. Always use the createTurtle() function
-    in the Graphics class
-    """
+# Misc functions
+KEY_DELETE        = 0xffff
+KEY_SELECT        = 0xff60
+KEY_PRINT         = 0xff61
+KEY_EXECUTE       = 0xff62
+KEY_INSERT        = 0xff63
+KEY_UNDO          = 0xff65
+KEY_REDO          = 0xff66
+KEY_MENU          = 0xff67
+KEY_FIND          = 0xff68
+KEY_CANCEL        = 0xff69
+KEY_HELP          = 0xff6a
+KEY_BREAK         = 0xff6b
+KEY_MODESWITCH    = 0xff7e
+KEY_SCRIPTSWITCH  = 0xff7e
+KEY_FUNCTION      = 0xffd2
 
-    def __init__(self, graphics):
-        self.graphics = graphics
+# Text motion constants: these are allowed to clash with key constants
+KEY_MOTION_UP                = KEY_UP
+KEY_MOTION_RIGHT             = KEY_RIGHT
+KEY_MOTION_DOWN              = KEY_DOWN
+KEY_MOTION_LEFT              = KEY_LEFT
+KEY_MOTION_NEXT_WORD         = 1
+KEY_MOTION_PREVIOUS_WORD     = 2
+KEY_MOTION_BEGINNING_OF_LINE = 3
+KEY_MOTION_END_OF_LINE       = 4
+KEY_MOTION_NEXT_PAGE         = KEY_PAGEDOWN
+KEY_MOTION_PREVIOUS_PAGE     = KEY_PAGEUP
+KEY_MOTION_BEGINNING_OF_FILE = 5
+KEY_MOTION_END_OF_FILE       = 6
+KEY_MOTION_BACKSPACE         = KEY_BACKSPACE
+KEY_MOTION_DELETE            = KEY_DELETE
 
-        self.t = turtle.Turtle();
+# Number pad
+KEY_NUMLOCK       = 0xff7f
+KEY_NUM_SPACE     = 0xff80
+KEY_NUM_TAB       = 0xff89
+KEY_NUM_ENTER     = 0xff8d
+KEY_NUM_F1        = 0xff91
+KEY_NUM_F2        = 0xff92
+KEY_NUM_F3        = 0xff93
+KEY_NUM_F4        = 0xff94
+KEY_NUM_HOME      = 0xff95
+KEY_NUM_LEFT      = 0xff96
+KEY_NUM_UP        = 0xff97
+KEY_NUM_RIGHT     = 0xff98
+KEY_NUM_DOWN      = 0xff99
+KEY_NUM_PRIOR     = 0xff9a
+KEY_NUM_PAGE_UP   = 0xff9a
+KEY_NUM_NEXT      = 0xff9b
+KEY_NUM_PAGE_DOWN = 0xff9b
+KEY_NUM_END       = 0xff9c
+KEY_NUM_BEGIN     = 0xff9d
+KEY_NUM_INSERT    = 0xff9e
+KEY_NUM_DELETE    = 0xff9f
+KEY_NUM_EQUAL     = 0xffbd
+KEY_NUM_MULTIPLY  = 0xffaa
+KEY_NUM_ADD       = 0xffab
+KEY_NUM_SEPARATOR = 0xffac
+KEY_NUM_SUBTRACT  = 0xffad
+KEY_NUM_DECIMAL   = 0xffae
+KEY_NUM_DIVIDE    = 0xffaf
 
-    """
-    Lifts the pen up. Disables drawing upon movement. Useful for
-    repositioning the turtle.
-        Arguments: None
-        Returns:   None
-    """
+KEY_NUM_0         = 0xffb0
+KEY_NUM_1         = 0xffb1
+KEY_NUM_2         = 0xffb2
+KEY_NUM_3         = 0xffb3
+KEY_NUM_4         = 0xffb4
+KEY_NUM_5         = 0xffb5
+KEY_NUM_6         = 0xffb6
+KEY_NUM_7         = 0xffb7
+KEY_NUM_8         = 0xffb8
+KEY_NUM_9         = 0xffb9
 
-    def penUp(self):
-        self.t.pu()
+# Function keys
+KEY_F1            = 0xffbe
+KEY_F2            = 0xffbf
+KEY_F3            = 0xffc0
+KEY_F4            = 0xffc1
+KEY_F5            = 0xffc2
+KEY_F6            = 0xffc3
+KEY_F7            = 0xffc4
+KEY_F8            = 0xffc5
+KEY_F9            = 0xffc6
+KEY_F10           = 0xffc7
+KEY_F11           = 0xffc8
+KEY_F12           = 0xffc9
+KEY_F13           = 0xffca
+KEY_F14           = 0xffcb
+KEY_F15           = 0xffcc
+KEY_F16           = 0xffcd
+KEY_F17           = 0xffce
+KEY_F18           = 0xffcf
+KEY_F19           = 0xffd0
+KEY_F20           = 0xffd1
 
-    """
-    Puts the pen back down on the screen. Turtle will now leave a 'trail'
-    upon being moved.
-        Arguments: None
-        Returns:   None
+# Modifiers
+KEY_LSHIFT        = 0xffe1
+KEY_RSHIFT        = 0xffe2
+KEY_LCTRL         = 0xffe3
+KEY_RCTRL         = 0xffe4
+KEY_CAPSLOCK      = 0xffe5
+KEY_LMETA         = 0xffe7
+KEY_RMETA         = 0xffe8
+KEY_LALT          = 0xffe9
+KEY_RALT          = 0xffea
+KEY_LWINDOWS      = 0xffeb
+KEY_RWINDOWS      = 0xffec
+KEY_LCOMMAND      = 0xffed
+KEY_RCOMMAND      = 0xffee
+KEY_LOPTION       = 0xffef
+KEY_ROPTION       = 0xfff0
 
-    """
+# Latin-1
+KEY_SPACE         = 0x020
+KEY_EXCLAMATION   = 0x021
+KEY_DOUBLEQUOTE   = 0x022
+KEY_HASH          = 0x023
+KEY_POUND         = 0x023  # synonym
+KEY_DOLLAR        = 0x024
+KEY_PERCENT       = 0x025
+KEY_AMPERSAND     = 0x026
+KEY_APOSTROPHE    = 0x027
+KEY_PARENLEFT     = 0x028
+KEY_PARENRIGHT    = 0x029
+KEY_ASTERISK      = 0x02a
+KEY_PLUS          = 0x02b
+KEY_COMMA         = 0x02c
+KEY_MINUS         = 0x02d
+KEY_PERIOD        = 0x02e
+KEY_SLASH         = 0x02f
+KEY__0            = 0x030
+KEY__1            = 0x031
+KEY__2            = 0x032
+KEY__3            = 0x033
+KEY__4            = 0x034
+KEY__5            = 0x035
+KEY__6            = 0x036
+KEY__7            = 0x037
+KEY__8            = 0x038
+KEY__9            = 0x039
+KEY_COLON         = 0x03a
+KEY_SEMICOLON     = 0x03b
+KEY_LESS          = 0x03c
+KEY_EQUAL         = 0x03d
+KEY_GREATER       = 0x03e
+KEY_QUESTION      = 0x03f
+KEY_AT            = 0x040
+KEY_BRACKETLEFT   = 0x05b
+KEY_BACKSLASH     = 0x05c
+KEY_BRACKETRIGHT  = 0x05d
+KEY_ASCIICIRCUM   = 0x05e
+KEY_UNDERSCORE    = 0x05f
+KEY_GRAVE         = 0x060
+KEY_QUOTELEFT     = 0x060
+KEY_A             = 0x061
+KEY_B             = 0x062
+KEY_C             = 0x063
+KEY_D             = 0x064
+KEY_E             = 0x065
+KEY_F             = 0x066
+KEY_G             = 0x067
+KEY_H             = 0x068
+KEY_I             = 0x069
+KEY_J             = 0x06a
+KEY_K             = 0x06b
+KEY_L             = 0x06c
+KEY_M             = 0x06d
+KEY_N             = 0x06e
+KEY_O             = 0x06f
+KEY_P             = 0x070
+KEY_Q             = 0x071
+KEY_R             = 0x072
+KEY_S             = 0x073
+KEY_T             = 0x074
+KEY_U             = 0x075
+KEY_V             = 0x076
+KEY_W             = 0x077
+KEY_X             = 0x078
+KEY_Y             = 0x079
+KEY_Z             = 0x07a
+KEY_BRACELEFT     = 0x07b
+KEY_BAR           = 0x07c
+KEY_BRACERIGHT    = 0x07d
+KEY_ASCIITILDE    = 0x07e
 
-    def penDown(self):
-        self.t.pd()
-
-    """
-    Sets the pen color. This will colour the outline of any filled shapes too.
-        Arguments:
-            color - the colour of the pen. Color format is RGB: (255,255,255)
-        Returns:   None
-
-    """
-
-    def setPenColor(self, color):
-        self.t.pencolor(self.graphics._convCol(color))
-
-    """
-    Sets the fill color. This will colour the interior of any filled shapes.
-        Arguments:
-            color - the colour of the pen. Color format is RGB: (255,255,255)
-        Returns:   None
-    """
-
-    def setFillColor(self, color):
-        self.t.fillcolor(self.graphics._convCol(color))
-
-    """
-    Sets the heading of the turtle in degrees.
-        Arguments:
-            heading - the turtle's heading in degrees. 0 degrees is pointing in
-            the positive y-axis (north)
-        Returns:   None
-    """
-
-    def setHeading(self, heading):
-        self.t.seth(heading)
-
-    """
-    Turns the turtle right by the number of the degrees.
-        Arguments:
-            angle - the number of degrees to turn right
-        Returns:   None
-    """
-
-    def turnRight(self, angle):
-        self.t.right(angle)
-
-    """
-    Turns the turtle left by the number of the degrees.
-        Arguments:
-            angle - the number of degrees to turn left
-        Returns:   None
-    """
-
-    def turnLeft(self, angle):
-        self.t.left(angle)
-
-    """
-    Sets the position of the turtle
-        Arguments:
-            x - the x coordinate
-            y - the y coordinate
-        Returns:   None
-    """
-
-    def setPos(self, x, y):
-        self.t.setpos(x, y)
-
-    """
-    Prepares the turtle to draw a filled in polygon.
-    All the subsequent forward() and setPos() will form the outline of the polygon.
-    Note that endFill() will need to be called to complete the shape and actually
-    draw the polygon.
-        Arguments: None
-        Returns:   None
-    """
-
-    def beginFill(self):
-        self.t.begin_fill()
-
-    """
-    Completes the drawing of a filled in polygon.
-    All the forward() and setPos() calls after the most recent beginFill() call
-    will form the outline of the polygon.
-        Arguments: None
-        Returns:   None
-    """
-
-    def endFill(self):
-        self.t.end_fill()
-
-    """
-    Moves the turtle forward by a set number of steps.
-    Whether or not a line is drawn as a trail depends on whether the pen is down or up.
-        Arguments:
-            length - how far the turtle will move, in pixels.
-        Returns:   None
-    """
-
-    def forward(self, length):
-        self.t.forward(length)
-
+MOUSE_BUTTON_NONE   = 0
+MOUSE_BUTTON_LEFT   = 1
+MOUSE_BUTTON_RIGHT  = 2
+MOUSE_BUTTON_MIDDLE = 3
 
 """
 A simple graphics wrapper around PyGame.
@@ -143,8 +222,6 @@ It redefines the coordinate system to be like the Secondary School level cartesi
 It also exposes a simple turtle object that can be manipulated like the LOGO turtle for
 basic line drawing.
 """
-
-
 class Graphics:
     """
     Constructor:
@@ -165,6 +242,20 @@ class Graphics:
 
         turtle.screensize(width, height)
 
+        self.keys = dict([(a, False) for a in range(255)] +
+                         [(a, False) for a in range(0xff00, 0xffff)])
+
+        turtle.onkeypress(self._onKeyPressed_Down, "Down")
+        turtle.onkeypress(self._onKeyPressed_Up, "Up")
+        turtle.onkeypress(self._onKeyPressed_Left, "Left")
+        turtle.onkeypress(self._onKeyPressed_Right, "Right")
+
+        turtle.onkeyrelease(self._onKeyReleased_Down, "Down")
+        turtle.onkeyrelease(self._onKeyReleased_Up, "Up")
+        turtle.onkeyrelease(self._onKeyReleased_Left, "Left")
+        turtle.onkeyrelease(self._onKeyReleased_Right, "Right")
+
+        turtle.listen()
         # pygame.init()
         # self.screen = pygame.display.set_mode((self.width, self.height))
         # pygame.display.set_caption(title)
@@ -189,16 +280,6 @@ class Graphics:
         self.fps = fps
 
     """
-    Creates a new turtle to draw basic line graphics
-        Arguments: None
-        Returns:
-            A new turtle object (see definition at the top of this file)
-    """
-
-    def createTurtle(self):
-        return Turtle(self)
-
-    """
     Adds an event listener that will get triggered in the main loop based on received pygame events
     (e.g. keyboard or mouse events)
         Arguments:
@@ -209,6 +290,15 @@ class Graphics:
 
     def addEventListener(self, listener):
         self.listeners.append(listener)
+
+    def _convX(self, x):
+        return x - self.width / 2
+
+    def _convY(self, y):
+        return y - self.height / 2
+
+    def _convXY(self, x, y):
+        return [self._convX(x), self._convY(y)]
 
     """
     The main update loop that gets run FPS times per second
@@ -241,6 +331,7 @@ class Graphics:
                 self.draw_func()
 
         turtle.update()
+        turtle.listen()
         turtle.ontimer(self.run, int(1 / self.fps * 1000))
 
     """
@@ -299,7 +390,7 @@ class Graphics:
     def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=None, rect=None):
         turtle.pu()
         turtle.shape(image)
-        turtle.setpos((x,y))
+        turtle.setpos(self._convXY(x,y))
         turtle.pd()
         turtle.stamp()
 
@@ -334,6 +425,28 @@ class Graphics:
 
     def drawPixel(self, color, pos):
         self.screen.set_at(self._conv(pos), color)
+
+    def isKeyDown(self, key):
+        return self.keys[key]
+
+    def _onKeyPressed_Up(self):
+        self.keys[KEY_UP] = True
+    def _onKeyPressed_Down(self):
+        self.keys[KEY_DOWN] = True
+    def _onKeyPressed_Left(self):
+        self.keys[KEY_LEFT] = True
+    def _onKeyPressed_Right(self):
+        self.keys[KEY_RIGHT] = True
+
+    def _onKeyReleased_Up(self):
+        self.keys[KEY_UP] = False
+    def _onKeyReleased_Down(self):
+        self.keys[KEY_DOWN] = False
+    def _onKeyReleased_Left(self):
+        self.keys[KEY_LEFT] = False
+    def _onKeyReleased_Right(self):
+        self.keys[KEY_RIGHT] = False
+
 
 ##################################################################################################################################
 
