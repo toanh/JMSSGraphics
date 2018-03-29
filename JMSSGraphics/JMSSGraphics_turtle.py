@@ -244,7 +244,9 @@ class Graphics:
         self.listeners = []
 
         root = tk.Tk()
+        root.title(title)
         canvas = tk.Canvas(master=root, width=width, height=height)
+
         canvas.pack()
 
         self.t = turtle.RawTurtle(canvas)
@@ -266,6 +268,18 @@ class Graphics:
         self.screen.onkeyrelease(self._onKeyReleased_Up, "Up")
         self.screen.onkeyrelease(self._onKeyReleased_Left, "Left")
         self.screen.onkeyrelease(self._onKeyReleased_Right, "Right")
+
+        self.screen.onkeypress(self._onKeyPressed_W, "w")
+        self.screen.onkeyrelease(self._onKeyReleased_W, "w")
+
+        self.screen.onkeypress(self._onKeyPressed_S, "s")
+        self.screen.onkeyrelease(self._onKeyReleased_S, "s")
+
+        self.screen.onkeypress(self._onKeyPressed_A, "a")
+        self.screen.onkeyrelease(self._onKeyReleased_A, "a")
+
+        self.screen.onkeypress(self._onKeyPressed_D, "d")
+        self.screen.onkeyrelease(self._onKeyReleased_D, "d")
 
         self.screen.listen()
         # pygame.init()
@@ -466,6 +480,26 @@ class Graphics:
     def _onKeyReleased_Right(self):
         self.keys[KEY_RIGHT] = False
 
+
+    def _onKeyPressed_W(self):
+        self.keys[KEY_W] = True
+    def _onKeyReleased_W(self):
+        self.keys[KEY_W] = False
+
+    def _onKeyPressed_S(self):
+        self.keys[KEY_S] = True
+    def _onKeyReleased_S(self):
+        self.keys[KEY_S] = False
+
+    def _onKeyPressed_A(self):
+        self.keys[KEY_A] = True
+    def _onKeyReleased_A(self):
+        self.keys[KEY_A] = False
+
+    def _onKeyPressed_D(self):
+        self.keys[KEY_D] = True
+    def _onKeyReleased_D(self):
+        self.keys[KEY_D] = False
 
 ##################################################################################################################################
 
