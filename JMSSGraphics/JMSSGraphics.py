@@ -448,51 +448,32 @@ class Graphics:
         pyglet.graphics.draw(2, pyglet.gl.GL_LINES, 
             ("v2f", (x1, y1, x2, y2))
         )
-'''
-    def drawCircle(self, color, pos, radius, width = 0):
-        pygame.draw.circle(self.screen, color, self._conv(pos), radius, width)
 
+    def drawCircle(self, color, x, y, radius):
+        pyglet.gl.glColor4f(*color)
+        verts = [x, y]
+        numPoints = int(radius * 5)
+        for i in range(numPoints):
+            angle = math.radians(float(i)/numPoints * 360.0)
+            c_x = radius * math.cos(angle) + x
+            c_y = radius * math.sin(angle) + y
+            verts += [c_x,c_y]
+        verts += [x + radius, y]
+        circle = pyglet.graphics.vertex_list(numPoints + 2, ('v2f', verts))
+        circle.draw(pyglet.gl.GL_TRIANGLE_FAN)
 
-    def drawPixel(self, pos, color):
-        self.screen.set_at(self._conv(pos), color)
+    def drawPixel(self, color, x, y):
+        pyglet.gl.glColor4f(*color)
+        verts = [x, y]
 
-    def drawRect(self, color, rect, width = 0, rotation = 0, pivot = None):
+        point = pyglet.graphics.vertex_list(1, ('v2f', verts))
+        point.draw(pyglet.gl.GL_POINTS)
 
-        if (rotation != 0):
-            points = []
-            points.append([rect[0], rect[1]])
-            points.append([rect[0] + rect[2], rect[1]])
-            points.append([rect[0] + rect[2], rect[1] + rect[3]])
-            points.append([rect[0], rect[1] + rect[3]])
-
-            for point in points:
-                if (pivot is None):
-                    point[0] -= rect[0]
-                    point[1] -= rect[1]
-                else:
-                    point[0] -= pivot[0]
-                    point[1] -= pivot[1]
-
-            rotated =[]
-            for i in range(0, len(points)):
-                rotatedPt = [0, 0]
-                rotatedPt[0] = points[i][0] * math.cos(rotation) - points[i][1] * math.sin(rotation)
-                rotatedPt[1] = points[i][0] * math.sin(rotation) + points[i][1] * math.cos(rotation)
-                rotated.append(rotatedPt)
-
-            for point in rotated:
-                if (pivot is None):
-                    point[0] += rect[0]
-                    point[1] += rect[1]
-                else:
-                    point[0] += pivot[0]
-                    point[1] += pivot[1]
-
-                point[0] = self._conx(point[0])
-                point[1] = self._cony(point[1])
-
-            pygame.draw.polygon(self.screen, color, rotated, width)
-        else:
-            pygame.draw.rect(self.screen, color, pygame.Rect(self._conx(rect[0]), self._cony(rect[1]), rect[2], rect[3]), width)
-
-'''
+    def drawRect(self, color, x1, y1, x2, y2):
+        pyglet.gl.glColor4f(*color)
+        verts = [x1, y1]
+        verts += [x1, y2]
+        verts += [x2, y2]
+        verts += [x2, y1]
+        rect = pyglet.graphics.vertex_list(4, ('v2f', verts))
+        rect.draw(pyglet.gl.GL_TRIANGLE_FAN)
