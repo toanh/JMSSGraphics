@@ -251,6 +251,8 @@ class JMSSPygletApp(pyglet.window.Window):
 
         self.batch = pyglet.graphics.Batch()
 
+        self.verts = []
+
         #self.set_mouse_visible(False)
 
     def start(self):
@@ -259,13 +261,19 @@ class JMSSPygletApp(pyglet.window.Window):
         pyglet.clock.schedule_interval(self.mainloop, 1.0 / self.fps)
         pyglet.clock.set_fps_limit(self.fps)
 
+    def on_draw(self):
+        self.batch.draw()
+        for shape in self.verts:
+            shape[0].draw(shape[1])
+        self.sprites = []
+        self.verts = []
+
     def mainloop(self, dt, *args, **kwargs):
         #self.graphics.update()
-        self.sprites = []
+        #self.sprites = []
         if (self.draw_func is not None):
             self.draw_func()
-
-            self.batch.draw()
+            #self.batch.draw()
 
     def on_key_press(self, symbol, modifiers):
         self.keys[symbol] = True
@@ -460,14 +468,16 @@ class Graphics:
             verts += [c_x,c_y]
         verts += [x + radius, y]
         circle = pyglet.graphics.vertex_list(numPoints + 2, ('v2f', verts))
-        circle.draw(pyglet.gl.GL_TRIANGLE_FAN)
+        self.app.verts.append([circle, pyglet.gl.GL_TRIANGLE_FAN])
+        #circle.draw(pyglet.gl.GL_TRIANGLE_FAN)
 
     def drawPixel(self, color, x, y):
         pyglet.gl.glColor4f(*color)
         verts = [x, y]
 
         point = pyglet.graphics.vertex_list(1, ('v2f', verts))
-        point.draw(pyglet.gl.GL_POINTS)
+        self.app.verts.append([point, pyglet.gl.GL_POINTS])
+        #point.draw(pyglet.gl.GL_POINTS)
 
     def drawRect(self, color, x1, y1, x2, y2):
         pyglet.gl.glColor4f(*color)
@@ -476,4 +486,5 @@ class Graphics:
         verts += [x2, y2]
         verts += [x2, y1]
         rect = pyglet.graphics.vertex_list(4, ('v2f', verts))
-        rect.draw(pyglet.gl.GL_TRIANGLE_FAN)
+        self.app.verts.append([rect, pyglet.gl.GL_TRIANGLE_FAN])
+        #rect.draw(pyglet.gl.GL_TRIANGLE_FAN)

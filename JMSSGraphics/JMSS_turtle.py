@@ -249,11 +249,13 @@ class Graphics:
         turtle.onkeypress(self._onKeyPressed_Up, "Up")
         turtle.onkeypress(self._onKeyPressed_Left, "Left")
         turtle.onkeypress(self._onKeyPressed_Right, "Right")
+        turtle.onkeypress(self._onKeyPressed_W, "w")
 
         turtle.onkeyrelease(self._onKeyReleased_Down, "Down")
         turtle.onkeyrelease(self._onKeyReleased_Up, "Up")
         turtle.onkeyrelease(self._onKeyReleased_Left, "Left")
         turtle.onkeyrelease(self._onKeyReleased_Right, "Right")
+        turtle.onkeyrelease(self._onKeyReleased_W, "w")
 
         turtle.listen()
         # pygame.init()
@@ -437,6 +439,8 @@ class Graphics:
         self.keys[KEY_LEFT] = True
     def _onKeyPressed_Right(self):
         self.keys[KEY_RIGHT] = True
+    def _onKeyPressed_W(self):
+        self.keys[KEY_W] = True
 
     def _onKeyReleased_Up(self):
         self.keys[KEY_UP] = False
@@ -446,6 +450,8 @@ class Graphics:
         self.keys[KEY_LEFT] = False
     def _onKeyReleased_Right(self):
         self.keys[KEY_RIGHT] = False
+    def _onKeyReleased_W(self):
+        self.keys[KEY_W] = False
 
 
 ##################################################################################################################################
