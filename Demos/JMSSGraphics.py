@@ -6,28 +6,28 @@ from pyglet.window import mouse
 # Key symbol constants
 
 # ASCII commands
-KEY_BACKSPACE     = 0xff08
-KEY_TAB           = 0xff09
-KEY_LINEFEED      = 0xff0a
-KEY_CLEAR         = 0xff0b
-KEY_RETURN        = 0xff0d
-KEY_ENTER         = 0xff0d      # synonym
-KEY_PAUSE         = 0xff13
-KEY_SCROLLLOCK    = 0xff14
-KEY_SYSREQ        = 0xff15
-KEY_ESCAPE        = 0xff1b
-KEY_SPACE         = 0xff20
+KEY_BACKSPACE     = pyglet.window.key.BACKSPACE
+KEY_TAB           = pyglet.window.key.TAB
+KEY_LINEFEED      = pyglet.window.key.LINEFEED
+KEY_CLEAR         = pyglet.window.key.CLEAR
+KEY_RETURN        = pyglet.window.key.RETURN
+KEY_ENTER         = pyglet.window.key.ENTER
+KEY_PAUSE         = pyglet.window.key.PAUSE
+KEY_SCROLLLOCK    = pyglet.window.key.SCROLLLOCK
+KEY_SYSREQ        = pyglet.window.key.SYSREQ
+KEY_ESCAPE        = pyglet.window.key.ESCAPE
+KEY_SPACE         = pyglet.window.key.SPACE
 
 # Cursor control and motion
-KEY_HOME          = 0xff50
-KEY_LEFT          = 0xff51
-KEY_UP            = 0xff52
-KEY_RIGHT         = 0xff53
-KEY_DOWN          = 0xff54
-KEY_PAGEUP        = 0xff55
-KEY_PAGEDOWN      = 0xff56
-KEY_END           = 0xff57
-KEY_BEGIN         = 0xff58
+KEY_HOME          = pyglet.window.key.HOME
+KEY_LEFT          = pyglet.window.key.LEFT
+KEY_UP            = pyglet.window.key.UP
+KEY_RIGHT         = pyglet.window.key.RIGHT
+KEY_DOWN          = pyglet.window.key.DOWN
+KEY_PAGEUP        = pyglet.window.key.PAGEUP
+KEY_PAGEDOWN      = pyglet.window.key.PAGEDOWN
+KEY_END           = pyglet.window.key.END
+KEY_BEGIN         = pyglet.window.key.BEGIN
 
 # Misc functions
 KEY_DELETE        = 0xffff
@@ -251,6 +251,7 @@ class JMSSPygletApp(pyglet.window.Window):
 
         self.batch = pyglet.graphics.Batch()
 
+        self.sprites = []
         self.verts = []
 
         #self.set_mouse_visible(False)
@@ -261,19 +262,26 @@ class JMSSPygletApp(pyglet.window.Window):
         pyglet.clock.schedule_interval(self.mainloop, 1.0 / self.fps)
         pyglet.clock.set_fps_limit(self.fps)
 
-    def on_draw(self):
-        self.batch.draw()
-        for shape in self.verts:
-            shape[0].draw(shape[1])
-        self.sprites = []
-        self.verts = []
+    #def on_draw(self):
+        #return
 
     def mainloop(self, dt, *args, **kwargs):
         #self.graphics.update()
         #self.sprites = []
+        self.sprites = []
+        self.verts = []
+
         if (self.draw_func is not None):
             self.draw_func()
-            #self.batch.draw()
+
+        self.batch.draw()
+
+        for shape in self.verts:
+            shape[0].draw(shape[1])
+
+        self.invalid = False
+
+
 
     def on_key_press(self, symbol, modifiers):
         self.keys[symbol] = True
@@ -286,6 +294,7 @@ class JMSSPygletApp(pyglet.window.Window):
         self.mouse_y = y
         self.mouse_dx = dx
         self.mouse_dy = dy
+        self.invalid = False
 
     # TODO: implement multiple mouse button press and release in a list
     # currently only 1 button's state is stored at a time
