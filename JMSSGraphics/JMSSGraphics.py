@@ -1,33 +1,34 @@
 import pyglet
 import math
+import inspect
 
 from pyglet.window import mouse
 
 # Key symbol constants
 
 # ASCII commands
-KEY_BACKSPACE     = 0xff08
-KEY_TAB           = 0xff09
-KEY_LINEFEED      = 0xff0a
-KEY_CLEAR         = 0xff0b
-KEY_RETURN        = 0xff0d
-KEY_ENTER         = 0xff0d      # synonym
-KEY_PAUSE         = 0xff13
-KEY_SCROLLLOCK    = 0xff14
-KEY_SYSREQ        = 0xff15
-KEY_ESCAPE        = 0xff1b
-KEY_SPACE         = 0xff20
+KEY_BACKSPACE     = pyglet.window.key.BACKSPACE
+KEY_TAB           = pyglet.window.key.TAB
+KEY_LINEFEED      = pyglet.window.key.LINEFEED
+KEY_CLEAR         = pyglet.window.key.CLEAR
+KEY_RETURN        = pyglet.window.key.RETURN
+KEY_ENTER         = pyglet.window.key.ENTER
+KEY_PAUSE         = pyglet.window.key.PAUSE
+KEY_SCROLLLOCK    = pyglet.window.key.SCROLLLOCK
+KEY_SYSREQ        = pyglet.window.key.SYSREQ
+KEY_ESCAPE        = pyglet.window.key.ESCAPE
+KEY_SPACE         = pyglet.window.key.SPACE
 
 # Cursor control and motion
-KEY_HOME          = 0xff50
-KEY_LEFT          = 0xff51
-KEY_UP            = 0xff52
-KEY_RIGHT         = 0xff53
-KEY_DOWN          = 0xff54
-KEY_PAGEUP        = 0xff55
-KEY_PAGEDOWN      = 0xff56
-KEY_END           = 0xff57
-KEY_BEGIN         = 0xff58
+KEY_HOME          = pyglet.window.key.HOME
+KEY_LEFT          = pyglet.window.key.LEFT
+KEY_UP            = pyglet.window.key.UP
+KEY_RIGHT         = pyglet.window.key.RIGHT
+KEY_DOWN          = pyglet.window.key.DOWN
+KEY_PAGEUP        = pyglet.window.key.PAGEUP
+KEY_PAGEDOWN      = pyglet.window.key.PAGEDOWN
+KEY_END           = pyglet.window.key.END
+KEY_BEGIN         = pyglet.window.key.BEGIN
 
 # Misc functions
 KEY_DELETE        = 0xffff
@@ -251,7 +252,13 @@ class JMSSPygletApp(pyglet.window.Window):
 
         self.batch = pyglet.graphics.Batch()
 
+        self.sprites = []
         self.verts = []
+        self.labels = []
+
+        self.orderedGroupCounter = 0
+        self.renderType = 0         # 1 = sprite, 2 = label, 3 = vertices
+        self.orderedGroup = None
 
         #self.set_mouse_visible(False)
 
@@ -261,19 +268,37 @@ class JMSSPygletApp(pyglet.window.Window):
         pyglet.clock.schedule_interval(self.mainloop, 1.0 / self.fps)
         pyglet.clock.set_fps_limit(self.fps)
 
-    def on_draw(self):
-        self.batch.draw()
-        for shape in self.verts:
-            shape[0].draw(shape[1])
-        self.sprites = []
-        self.verts = []
+    #def on_draw(self):
+        #return
 
     def mainloop(self, dt, *args, **kwargs):
         #self.graphics.update()
         #self.sprites = []
+        for sprite in self.sprites:
+            sprite.delete()
+        for shape in self.verts:
+            shape.delete()
+        for label in self.labels:
+            label.delete()
+
+        self.sprites = []
+        self.verts = []
+        self.labels = []
+
+        self.orderedGroupCounter = -1
+        self.renderType = 0
+
         if (self.draw_func is not None):
-            self.draw_func()
-            #self.batch.draw()
+            if (len(inspect.signature(self.draw_func)._parameters)) > 0:
+                self.draw_func(dt)
+            else:
+                self.draw_func()
+
+        self.batch.draw()
+
+        self.invalid = False
+
+
 
     def on_key_press(self, symbol, modifiers):
         self.keys[symbol] = True
@@ -286,6 +311,7 @@ class JMSSPygletApp(pyglet.window.Window):
         self.mouse_y = y
         self.mouse_dx = dx
         self.mouse_dy = dy
+        self.invalid = False
 
     # TODO: implement multiple mouse button press and release in a list
     # currently only 1 button's state is stored at a time
@@ -406,15 +432,27 @@ class Graphics:
             self.soundPlayers[sound].pause()
 
     def drawText(self, text, x, y, fontName = "Arial", fontSize = 10, color = (1, 1, 1, 1), anchorX = "left", anchorY ="bottom"):
-        label = pyglet.text.Label(text, color = self._convColor(color), font_name=fontName, font_size=fontSize, x = x, y = y, anchor_x = anchorX, anchor_y = anchorY)
-        label.draw()
+        if self.app.renderType != 2:
+            self.app.renderType = 2
+            self.app.orderedGroupCounter += 1
+            self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
+        label = pyglet.text.Label(text, color = self._convColor(color), font_name=fontName, font_size=fontSize, x = x, y = y, \
+                                  anchor_x = anchorX, anchor_y = anchorY, \
+                                  batch = self.app.batch, group = self.app.orderedGroup)
+        self.app.labels.append(label)
+        #label.draw()
 
     def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=None, rect=None):
+        if self.app.renderType != 1:
+            self.app.renderType = 1
+            self.app.orderedGroupCounter += 1
+            self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
         if (isinstance(image, str)):
             image = self.loadImage(image)
-            sprite = pyglet.sprite.Sprite(image, batch = self.app.batch)
+            sprite = pyglet.sprite.Sprite(image, batch = self.app.batch, group = self.app.orderedGroup)
         else:
-            sprite = pyglet.sprite.Sprite(image, batch = self.app.batch)
+            sprite = pyglet.sprite.Sprite(image, batch = self.app.batch, group = self.app.orderedGroup)
+
 
         if width is not None:
             sprite.scale_x =  width * 1.0 / sprite.width
@@ -430,7 +468,6 @@ class Graphics:
         if anchorX is not None:
             dx = anchorX * image.width * sprite.scale_x
             image.anchor_x = anchorX * image.width
-
 
         if anchorY is not None:
             dy = anchorY * image.height * sprite.scale_y
@@ -451,11 +488,27 @@ class Graphics:
         image.anchor_y = anchor_y
 
     def drawLine(self, x1, y1, x2, y2, r = 1.0, g = 1.0, b = 1.0, a = 1.0, width = 1):
+        if self.app.renderType != 3:
+            self.app.renderType = 3
+            self.app.orderedGroupCounter += 1
+            self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
         pyglet.gl.glLineWidth(width)
         pyglet.gl.glColor4f(r, g, b, a)
-        pyglet.graphics.draw(2, pyglet.gl.GL_LINES, 
-            ("v2f", (x1, y1, x2, y2))
-        )
+
+        '''
+        vertex_list = batch.add(2, pyglet.gl.GL_POINTS, None,
+                                ('v2i', (10, 15, 30, 35)),
+                                ('c3B', (0, 0, 255, 0, 255, 0))
+                                )
+        '''
+        #pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
+        #    ("v2f", (x1, y1, x2, y2))
+        #)
+        verts = self.app.batch.add(2, pyglet.gl.GL_LINES, self.app.orderedGroup,\
+                                   ("v2f", (x1, y1, x2, y2)), ("c4f", (r, g, b, a, r, g, b, a)))
+        self.app.verts.append(verts)
+
+
 
     def drawCircle(self, color, x, y, radius):
         pyglet.gl.glColor4f(*color)
