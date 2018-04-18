@@ -440,7 +440,6 @@ class Graphics:
                                   anchor_x = anchorX, anchor_y = anchorY, \
                                   batch = self.app.batch, group = self.app.orderedGroup)
         self.app.labels.append(label)
-        #label.draw()
 
     def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=None, rect=None):
         if self.app.renderType != 1:
@@ -493,7 +492,7 @@ class Graphics:
             self.app.orderedGroupCounter += 1
             self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
         pyglet.gl.glLineWidth(width)
-        pyglet.gl.glColor4f(r, g, b, a)
+        #pyglet.gl.glColor4f(r, g, b, a)
 
         '''
         vertex_list = batch.add(2, pyglet.gl.GL_POINTS, None,
@@ -511,7 +510,10 @@ class Graphics:
 
 
     def drawCircle(self, color, x, y, radius):
-        pyglet.gl.glColor4f(*color)
+        if self.app.renderType != 4:
+            self.app.renderType = 4
+            self.app.orderedGroupCounter += 1
+            self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
         verts = [x, y]
         numPoints = int(radius * 5)
         for i in range(numPoints):
@@ -520,24 +522,64 @@ class Graphics:
             c_y = radius * math.sin(angle) + y
             verts += [c_x,c_y]
         verts += [x + radius, y]
-        circle = pyglet.graphics.vertex_list(numPoints + 2, ('v2f', verts))
-        self.app.verts.append([circle, pyglet.gl.GL_TRIANGLE_FAN])
+        '''
+        circle = pyglet.graphics.vertex_list(1,
+            ('v2f', verts),
+            ('c4f', color)
+        )
+        '''
+        colors = color * (numPoints + 2)
+
+        verts = self.app.batch.add(numPoints + 2, pyglet.gl.GL_TRIANGLE_FAN, self.app.orderedGroup, \
+                                   ('v2f', verts),
+                                   ('c4f', colors))
+        self.app.verts.append(verts)
+
+
+        #circle = pyglet.graphics.vertex_list(numPoints + 2, ('v2f', verts))
+        #self.app.verts.append([circle, pyglet.gl.GL_TRIANGLE_FAN])
         #circle.draw(pyglet.gl.GL_TRIANGLE_FAN)
 
     def drawPixel(self, color, x, y):
-        pyglet.gl.glColor4f(*color)
+        if self.app.renderType != 5:
+            self.app.renderType = 5
+            self.app.orderedGroupCounter += 1
+            self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
+
         verts = [x, y]
 
-        point = pyglet.graphics.vertex_list(1, ('v2f', verts))
-        self.app.verts.append([point, pyglet.gl.GL_POINTS])
-        #point.draw(pyglet.gl.GL_POINTS)
+        #point = pyglet.graphics.vertex_list(1, ('v2f', verts))
+        '''
+        point = pyglet.graphics.vertex_list(1,
+            ('v2i', verts),
+            ('c4f', color)
+        )
+        '''
+
+        verts = self.app.batch.add(1, pyglet.gl.GL_POINTS, self.app.orderedGroup, \
+                                   ('v2i', verts),
+                                   ('c4f', color))
+        self.app.verts.append(verts)
 
     def drawRect(self, color, x1, y1, x2, y2):
-        pyglet.gl.glColor4f(*color)
+        if self.app.renderType != 6:
+            self.app.renderType = 6
+            self.app.orderedGroupCounter += 1
+            self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
+
         verts = [x1, y1]
         verts += [x1, y2]
         verts += [x2, y2]
+        verts += [x1, y1]
+        verts += [x2, y2]
         verts += [x2, y1]
-        rect = pyglet.graphics.vertex_list(4, ('v2f', verts))
-        self.app.verts.append([rect, pyglet.gl.GL_TRIANGLE_FAN])
+        #rect = pyglet.graphics.vertex_list(4, ('v2f', verts))
+        #self.app.verts.append([rect, pyglet.gl.GL_TRIANGLE_FAN])
         #rect.draw(pyglet.gl.GL_TRIANGLE_FAN)
+
+        colors = color * (6)
+
+        verts = self.app.batch.add(6, pyglet.gl.GL_TRIANGLES, self.app.orderedGroup, \
+                                   ('v2f', verts),
+                                   ('c4f', colors))
+        self.app.verts.append(verts)
