@@ -243,14 +243,16 @@ class Graphics:
 
         self.listeners = []
 
-        root = tk.Tk()
-        root.title(title)
-        canvas = tk.Canvas(master=root, width=width, height=height)
+        self.root = tk.Tk()
+        self.root.title(title)
+        canvas = tk.Canvas(master=self.root, width=width, height=height)
 
         canvas.pack()
 
         self.t = turtle.RawTurtle(canvas)
         self.screen = self.t.getscreen()
+
+        self.root.protocol('WM_DELETE_WINDOW', self.doClose)  # root is your root window
 
         #turtle.screensize(width, height)
 
@@ -291,6 +293,9 @@ class Graphics:
         Arguments: None
         Returns:   None
     """
+
+    def doClose(self):
+        self.done = True
 
     def getScreen(self):
         return self.screen
@@ -341,24 +346,27 @@ class Graphics:
         self.draw_func = func
 
     def run(self):
+        if self.done == True:
+            self.root.destroy()
+            return
         self.t.ht()
         self.screen.tracer(0, 0)
-        while not self.done:
-            """
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.done = True
-                    pygame.quit()
-                    return
-                for l in self.listeners:
-                    l(event)
-            """
-            if (self.draw_func is not None):
-                self.draw_func()
+
+        #while not self.done:
+        if (self.draw_func is not None):
+            self.draw_func()
 
         self.screen.update()
+
         self.screen.listen()
+
+        # to ensure that the last draw call is not a turtle movement based one
+        # doesn't seem to draw if the last operation is one of the ^^
+        #self.drawText("hello, world!", 0, 0, fontSize=20, color=(1, 0, 0))
+
+
         self.screen.ontimer(self.run, int(1 / self.fps * 1000))
+        #self.screen.ontimer(self.run, 100)
 
     """
     Loads an image from disk and returns it as an object to be used in the drawImage() function
@@ -425,7 +433,39 @@ class Graphics:
             self.t.setpos(self._convXY(x + int(self.images[image].width()/2),y + int(self.images[image].height()/2)))
             self.t.pd()
             self.t.stamp()
+            self.t.pu()
 
+    def drawText(self, text, x, y, fontName = "Arial", fontSize = 10, color = (1, 1, 1, 1), anchorX = "left", anchorY ="bottom"):
+        self.t.pu()
+        self.t.color([color[0], color[1], color[2]])
+        self.t.setpos(self._convXY(x, y))
+        self.t.pd()
+        self.t.write(text, move=False, align="left", font=(fontName, fontSize, "normal"))
+        self.t.pu()
+
+    def drawLine(self, x1, y1, x2, y2, r = 1.0, g = 1.0, b = 1.0, a = 1.0, width = 1):
+        self.t.pu()
+        self.t.pensize(width)
+        self.t.color([r, g, b])
+        self.t.setpos(self._convXY(x1, y1))
+        self.t.pd()
+        self.t.setpos(self._convXY(x2, y2))
+        self.t.pu()
+
+
+    def drawRect(self, color, x1, y1, x2, y2):
+        self.t.pu()
+        self.t.pensize(1)
+        self.t.color([color[0], color[1], color[2]])
+        self.t.begin_fill()
+        self.t.setpos(self._convXY(x1, y1))
+        self.t.pd()
+        self.t.setpos(self._convXY(x2, y1))
+        self.t.setpos(self._convXY(x2, y2))
+        self.t.setpos(self._convXY(x1, y2))
+        self.t.setpos(self._convXY(x1, y1))
+        self.t.end_fill()
+        self.t.pu()
 
     """
     Draws a circle on the screen.
@@ -438,14 +478,16 @@ class Graphics:
             None
     """
 
-    def drawCircle(self, color, pos, radius, width=0):
-        turtle.pu()
-        turtle.setpos(pos)
-        turtle.pd()
-        turtle.color(self._convCol(color))
-        turtle.begin_fill()
-        turtle.circle(radius)
-        turtle.end_fill()
+    def drawCircle(self, color, x, y, radius):
+        self.t.pu()
+        self.t.pensize(1)
+        self.t.setpos(self._convXY(x, y))
+        self.t.pd()
+        self.t.color([color[0], color[1], color[2]])
+        self.t.begin_fill()
+        self.t.circle(radius)
+        self.t.end_fill()
+        self.t.pu()
 
     """
     Draws a pixel on the screen.
