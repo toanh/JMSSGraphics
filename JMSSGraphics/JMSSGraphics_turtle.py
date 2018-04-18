@@ -1,5 +1,6 @@
 import turtle
 import math
+import inspect
 
 # ASCII commands
 KEY_BACKSPACE     = 0xff08
@@ -219,6 +220,13 @@ MOUSE_BUTTON_MIDDLE = 3
 from tkinter import PhotoImage
 import tkinter as tk
 
+class JMSSTurtleImage:
+    def __init__(self, image, imageName):
+        self.image = image
+        self.imageName = imageName
+        self.width = image.width()
+        self.height = image.height()
+
 """
 A simple graphics wrapper around PyGame.
 It redefines the coordinate system to be like the Secondary School level cartesian axes.
@@ -282,6 +290,12 @@ class Graphics:
 
         self.screen.onkeypress(self._onKeyPressed_D, "d")
         self.screen.onkeyrelease(self._onKeyReleased_D, "d")
+
+        self.screen.onkeypress(self._onKeyPressed_D, "d")
+        self.screen.onkeyrelease(self._onKeyReleased_D, "d")
+
+        self.screen.onkeypress(self._onKeyPressed_Space, " ")
+        self.screen.onkeyrelease(self._onKeyReleased_Space, " ")
 
         self.screen.listen()
         # pygame.init()
@@ -354,7 +368,11 @@ class Graphics:
 
         #while not self.done:
         if (self.draw_func is not None):
-            self.draw_func()
+            if (len(inspect.signature(self.draw_func)._parameters)) > 0:
+                # TODO: implement dt here!
+                self.draw_func(0)
+            else:
+                self.draw_func()
 
         self.screen.update()
 
@@ -406,7 +424,9 @@ class Graphics:
         self.screen.register_shape(file, turtle.Shape("image", image))
 
         self.images[file] = image
-        return file
+
+        turtleImage = JMSSTurtleImage(image, file)
+        return turtleImage
 
 
     """
@@ -425,12 +445,12 @@ class Graphics:
     """
     def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=None, rect=None):
         try:
-            self.t.shape(image)
+            self.t.shape(image.imageName)
         except turtle.TurtleGraphicsError as e:
             self.t.shape(self.loadImage(image))
         finally:
             self.t.pu()
-            self.t.setpos(self._convXY(x + int(self.images[image].width()/2),y + int(self.images[image].height()/2)))
+            self.t.setpos(self._convXY(x + int(self.images[image.imageName].width()/2),y + int(self.images[image.imageName].height()/2)))
             self.t.pd()
             self.t.stamp()
             self.t.pu()
@@ -491,6 +511,15 @@ class Graphics:
         self.t.end_fill()
         self.t.pu()
 
+    def loadSound(self, filename, streaming = False):
+        return None
+
+    def playSound(self, sound, loop = False):
+        pass
+
+    def pauseSound(self, sound):
+        pass
+
     """
     Draws a pixel on the screen.
         Arguments:
@@ -541,6 +570,11 @@ class Graphics:
         self.keys[KEY_D] = True
     def _onKeyReleased_D(self):
         self.keys[KEY_D] = False
+
+    def _onKeyPressed_Space(self):
+        self.keys[KEY_SPACE] = True
+    def _onKeyReleased_Space(self):
+        self.keys[KEY_SPACE] = False
 
 ##################################################################################################################################
 

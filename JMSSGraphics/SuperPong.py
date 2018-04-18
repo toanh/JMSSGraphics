@@ -1,4 +1,9 @@
-from JMSSGraphics import *
+use_turtle = True
+
+if use_turtle:
+    from JMSSGraphics_turtle import *
+else:
+    from JMSSGraphics import *
 
 from random import *
 import math
@@ -88,7 +93,7 @@ class Bullet(Entity):
 
 
 class Game:
-    def SpawnBall(self, x, y, xdir=None, ydir=None, filename="ball.png", respawnable=True):
+    def SpawnBall(self, x, y, xdir=None, ydir=None, filename="ball.png" if not use_turtle else "ball.gif", respawnable=True):
         ball = Ball(filename, respawnable)
         ball.x = x
         ball.y = y
@@ -157,9 +162,15 @@ class Game:
 
     def SpawnBullet(self, x, y, xdir, owner):
         if owner == self.p1:
-            bullet = Bullet("laser_red.png", owner)
+            if use_turtle:
+                bullet = Bullet("laser_red.gif", owner)
+            else:
+                bullet = Bullet("laser_red.png", owner)
         else:
-            bullet = Bullet("laser_blue.png", owner)
+            if use_turtle:
+                bullet = Bullet("laser_blue.gif", owner)
+            else:
+                bullet = Bullet("laser_blue.png", owner)
         bullet.x = x
         bullet.y = y - bullet.image.height / 2
         bullet.xdir = xdir
@@ -190,14 +201,22 @@ class Game:
 
         self.SpawnBall(300, 200)
 
-        paddle1 = Paddle("paddle_red.png", "gun_left.png", KEY_W, KEY_S, KEY_D, 3, 1)
+        if use_turtle:
+            paddle1 = Paddle("paddle_red.gif", "gun_left.gif", KEY_W, KEY_S, KEY_D, 3, 1)
+        else:
+            paddle1 = Paddle("paddle_red.png", "gun_left.png", KEY_W, KEY_S, KEY_D, 3, 1)
+
+
         paddle1.xdir = 0
         paddle1.ydir = 0
         paddle1.x = 0
         paddle1.y = 100
         self.p1 = paddle1
 
-        paddle2 = Paddle("paddle_blue.png", "gun_right.png", KEY_UP, KEY_DOWN, KEY_LEFT, 3, -1)
+        if use_turtle:
+            paddle2 = Paddle("paddle_blue.gif", "gun_right.gif", KEY_UP, KEY_DOWN, KEY_LEFT, 3, -1)
+        else:
+            paddle2 = Paddle("paddle_blue.png", "gun_right.png", KEY_UP, KEY_DOWN, KEY_LEFT, 3, -1)
         paddle2.xdir = 0
         paddle2.ydir = 0
         paddle2.x = 600 - 24
@@ -216,8 +235,12 @@ class Game:
 
         self.gameState = 0
 
-        self.title_image = jmss.loadImage("title.png")
-        self.bg_image = jmss.loadImage("background.png")
+        if use_turtle:
+            self.title_image = jmss.loadImage("title.gif")
+            self.bg_image = jmss.loadImage("background.gif")
+        else:
+            self.title_image = jmss.loadImage("title.png")
+            self.bg_image = jmss.loadImage("background.png")
         self.bg_x = 0
 
         # pre-load our sound files
@@ -275,6 +298,7 @@ class Game:
             self.bg_x = 0
 
         self.drawTriangleList(self.triList)
+        
 
         for b in self.bullets:
             b.Draw()
@@ -284,8 +308,12 @@ class Game:
         self.p1.Draw()
         self.p2.Draw()
 
-        jmss.drawText("Lives: " + str(self.p1.lives), 10, 350, fontSize=20)
-        jmss.drawText("Lives: " + str(self.p2.lives), 490, 350, fontSize=20)
+
+
+        jmss.drawText("Lives: " + str(self.p1.lives), 10, 350, fontSize=20, color=(1,1,1,1))
+        jmss.drawText("Lives: " + str(self.p2.lives), 490, 350, fontSize=20, color=(1,1,1,1))
+
+        
 
         '''
         mousePos = jmss.getMousePos()
@@ -309,7 +337,10 @@ class Game:
         self.triList = self.viewportTransform(self.triList, 500, 500)
 
         if randint(0, 600) < 1:
-            self.SpawnBall(300, 200, filename="ball_red.png", respawnable=False)
+            if use_turtle:
+                self.SpawnBall(300, 200, filename="ball_red.gif", respawnable=False)
+            else:
+                self.SpawnBall(300, 200, filename="ball_red.png", respawnable=False)
         for b in self.bullets:
             if b.x >= 600 or b.x <= -b.width:
                 self.bullets.remove(b)
