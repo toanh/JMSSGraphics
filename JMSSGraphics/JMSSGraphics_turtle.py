@@ -452,6 +452,8 @@ class Graphics:
         self.t.setpos(self._convXY(x2, y2))
         self.t.pu()
 
+    def drawPixel(self, color, x, y):
+        self.drawLine(x, y, x, y, r = color[0], g = color[1], b = color[2], width = 2)
 
     def drawRect(self, color, x1, y1, x2, y2):
         self.t.pu()
@@ -497,9 +499,6 @@ class Graphics:
         Returns:
             None
     """
-
-    def drawPixel(self, color, pos):
-        self.screen.set_at(self._conv(pos), color)
 
     def isKeyDown(self, key):
         return self.keys[key]
