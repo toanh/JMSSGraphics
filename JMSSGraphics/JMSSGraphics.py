@@ -583,3 +583,28 @@ class Graphics:
                                    ('v2f', verts),
                                    ('c4f', colors))
         self.app.verts.append(verts)
+
+    def drawRawPixels(self, data, x, y, width, height):
+        if self.app.renderType != 7:
+            self.app.renderType = 7
+            self.app.orderedGroupCounter += 1
+            self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
+
+        verts = []
+        num_points = width * height
+        for x2 in range(width):
+            for y2 in range(height):
+                verts += [x + x2, y + y2]
+
+        colours = []
+        for x2 in range(width):
+            for y2 in range(height):
+                colours += [data[(y2 * width + x2) * 3], \
+                            data[(y2 * width + x2) * 3 + 1], \
+                            data[(y2 * width + x2) * 3 + 2],
+                            1.0]
+
+        verts = self.app.batch.add(num_points, pyglet.gl.GL_POINTS, self.app.orderedGroup, \
+                                   ('v2i', verts),
+                                   ('c4f', colours))
+        self.app.verts.append(verts)

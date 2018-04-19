@@ -1,5 +1,3 @@
-# from: https://stackoverflow.com/questions/10439104/reading-bmp-files-in-python
-
 def read_rows(path):
     image_file = open(path, "rb")
     # Blindly skip the BMP header.
@@ -12,11 +10,11 @@ def read_rows(path):
     pixel_index = 0
 
     while True:
-        if pixel_index == 1920:
+        if pixel_index == 640:
             pixel_index = 0
             rows.insert(0, row)
-            if len(row) != 1920 * 3:
-                raise Exception("Row length is not 1920*3 but " + str(len(row)) + " / 3.0 = " + str(len(row) / 3.0))
+            if len(row) != 640 * 3:
+                raise Exception("Row length is not 640*3 but " + str(len(row)) + " / 3.0 = " + str(len(row) / 3.0))
             row = []
         pixel_index += 1
 
@@ -26,16 +24,16 @@ def read_rows(path):
 
         if len(r_string) == 0:
             # This is expected to happen when we've read everything.
-            if len(rows) != 1080:
-                print "Warning!!! Read to the end of the file at the correct sub-pixel (red) but we've not read 1080 rows!"
+            if len(rows) != 640:
+                print ("Warning!!! Read to the end of the file at the correct sub-pixel (red) but we've not read 1080 rows!")
             break
 
         if len(g_string) == 0:
-            print "Warning!!! Got 0 length string for green. Breaking."
+            print ("Warning!!! Got 0 length string for green. Breaking.")
             break
 
         if len(b_string) == 0:
-            print "Warning!!! Got 0 length string for blue. Breaking."
+            print ("Warning!!! Got 0 length string for blue. Breaking.")
             break
 
         r = ord(r_string)
@@ -51,20 +49,38 @@ def read_rows(path):
     return rows
 
 def repack_sub_pixels(rows):
-    print "Repacking pixels..."
+    print ("Repacking pixels...")
     sub_pixels = []
     for row in rows:
         for sub_pixel in row:
             sub_pixels.append(sub_pixel)
 
     diff = len(sub_pixels) - 1920 * 1080 * 3
-    print "Packed", len(sub_pixels), "sub-pixels."
+    print ("Packed", len(sub_pixels), "sub-pixels.")
     if diff != 0:
-        print "Error! Number of sub-pixels packed does not match 1920*1080: (" + str(len(sub_pixels)) + " - 1920 * 1080 * 3 = " + str(diff) +")."
+        print ("Error! Number of sub-pixels packed does not match 1920*1080: (" + str(len(sub_pixels)) + " - 1920 * 1080 * 3 = " + str(diff) +").")
 
     return sub_pixels
 
-rows = read_rows("my image.bmp")
+rows = read_rows("image.bmp")
+
+output_file = open("image.csv", "w")
+rows.reverse()
+for row in rows:
+    i = 0
+    while i < 640:
+        output_file.write(str(row[i * 3]) + "\n")
+        output_file.write(str(row[i * 3 + 1]) + "\n")
+        output_file.write(str(row[i * 3 + 2]) + "\n")
+        '''
+        print(row[i])
+        print(row[i + 1])
+        print(row[i + 2])
+        '''
+        i += 1       
+  
+
+output_file.close()
 
 # This list is raw sub-pixel values. A red image is for example (255, 0, 0, 255, 0, 0, ...).
 sub_pixels = repack_sub_pixels(rows)
