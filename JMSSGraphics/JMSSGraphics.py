@@ -1,3 +1,5 @@
+# Version 1.2
+
 import pyglet
 import math
 import inspect
