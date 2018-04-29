@@ -360,30 +360,26 @@ class Graphics:
         self.draw_func = func
 
     def run(self):
-        if self.done == True:
-            self.root.destroy()
-            return
         self.t.ht()
         self.screen.tracer(0, 0)
 
-        #while not self.done:
-        if (self.draw_func is not None):
-            if (len(inspect.signature(self.draw_func)._parameters)) > 0:
-                # TODO: implement dt here!
-                self.draw_func(0)
-            else:
-                self.draw_func()
+        while not self.done:
+            if (self.draw_func is not None):
+                if (len(inspect.signature(self.draw_func)._parameters)) > 0:
+                    # TODO: implement dt here!
+                    self.draw_func(0)
+                else:
+                    self.draw_func()
 
-        self.screen.update()
+            self.screen.update()
 
-        self.screen.listen()
-
+        self.root.destroy()
         # to ensure that the last draw call is not a turtle movement based one
         # doesn't seem to draw if the last operation is one of the ^^
         #self.drawText("hello, world!", 0, 0, fontSize=20, color=(1, 0, 0))
 
 
-        self.screen.ontimer(self.run, int(1 / self.fps * 1000))
+        #self.screen.ontimer(self.run, int(1 / self.fps * 1000))
         #self.screen.ontimer(self.run, 100)
 
     """
