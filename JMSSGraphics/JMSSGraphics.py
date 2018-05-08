@@ -1,4 +1,4 @@
-# Version 1.2
+# Version 1.2.1 (unstable)
 
 import pyglet
 import math
@@ -224,6 +224,8 @@ MOUSE_BUTTON_RIGHT  = 2
 MOUSE_BUTTON_MIDDLE = 3
 
 
+from pyglet.gl import *
+
 class JMSSPygletApp(pyglet.window.Window):
     def __init__(self, fps, graphics, *args, **kwargs):
         super(JMSSPygletApp, self).__init__(width=graphics.width,
@@ -290,17 +292,44 @@ class JMSSPygletApp(pyglet.window.Window):
         self.orderedGroupCounter = -1
         self.renderType = 0
 
+        self.texture = None
+
         if (self.draw_func is not None):
             if (len(inspect.signature(self.draw_func)._parameters)) > 0:
                 self.draw_func(dt)
             else:
                 self.draw_func()
 
-        self.batch.draw()
-
         self.invalid = False
 
+    def mainloop_ex(self, dt, *args, **kwargs):
+        #self.graphics.update()
+        #self.sprites = []
+        for sprite in self.sprites:
+            sprite.delete()
+        for shape in self.verts:
+            shape.delete()
+        for label in self.labels:
+            label.delete()
 
+        self.sprites = []
+        self.verts = []
+        self.labels = []
+
+        self.orderedGroupCounter = -1
+        self.renderType = 0
+
+        self.texture = None
+
+        if (self.draw_func is not None):
+            if (len(inspect.signature(self.draw_func)._parameters)) > 0:
+                self.draw_func(dt)
+            else:
+                self.draw_func()
+
+        self.graphics._renderPrimitives(self.renderType)
+
+        self.invalid = False
 
     def on_key_press(self, symbol, modifiers):
         self.keys[symbol] = True
@@ -344,6 +373,7 @@ class JMSSPygletApp(pyglet.window.Window):
             self.mouse_button_released = MOUSE_BUTTON_RIGHT
             self.mouse_button_pressed = MOUSE_BUTTON_NONE
 
+
 class Graphics:
     def __init__(self, width, height, title = "", fps = 60, fullscreen = False):
         self.width = width
@@ -383,8 +413,29 @@ class Graphics:
     def setFPS(self, fps):
         self.fps = fps
 
+    def _renderPrimitives(self, renderType):
+        if renderType == 1:
+            if (self.app.texture is not None):
+                self._drawTexturedQuads(self.app.texture)
+
+    def loadImage_ex(self, file):
+        img = pyglet.resource.image(file)
+
+        rawimage = img.get_image_data()
+        pitch = rawimage.width * len('RGBA')
+        data = rawimage.get_data('RGBA', pitch)
+
+        glBindTexture(GL_TEXTURE_2D, img.get_texture().id)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width, img.height,0, GL_RGBA, GL_UNSIGNED_BYTE, data)
+        glBindTexture(GL_TEXTURE_2D, 0)
+        return img
+
     def loadImage(self, file):
-        return pyglet.resource.image(file)
+        img = pyglet.resource.image(file)
+
+        return img
 
     def createSprite(self, image):
         # if the filename is supplied, create an image and autocreate the sprite
@@ -434,25 +485,118 @@ class Graphics:
             self.soundPlayers[sound].pause()
 
     def drawText(self, text, x, y, fontName = "Arial", fontSize = 10, color = (1, 1, 1, 1), anchorX = "left", anchorY ="bottom"):
-        if self.app.renderType != 2:
-            self.app.renderType = 2
-            self.app.orderedGroupCounter += 1
-            self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
+        #self.app.renderType = 2
+
         label = pyglet.text.Label(text, color = self._convColor(color), font_name=fontName, font_size=fontSize, x = x, y = y, \
                                   anchor_x = anchorX, anchor_y = anchorY, \
                                   batch = self.app.batch, group = self.app.orderedGroup)
-        self.app.labels.append(label)
+        label.draw()
+
+
+    def drawText_ex(self, text, x, y, fontName = "Arial", fontSize = 10, color = (1, 1, 1, 1), anchorX = "left", anchorY ="bottom"):
+        self._renderPrimitives(self.app.renderType)
+        self.app.renderType = 2
+
+        label = pyglet.text.Label(text, color = self._convColor(color), font_name=fontName, font_size=fontSize, x = x, y = y, \
+                                  anchor_x = anchorX, anchor_y = anchorY, \
+                                  batch = self.app.batch, group = self.app.orderedGroup)
+        label.draw()
+
+    def _drawTexturedQuads(self, image):
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+        glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, image.get_texture().id)
+
+        pyglet.graphics.draw(len(self.points)//2, pyglet.gl.GL_QUADS,
+                             ("v2f", self.points),
+                             ("t2f", self.texs),
+                             ("c4B", self.colors))
+
+        glDisable(GL_TEXTURE_2D)
+        glDisable(GL_BLEND)
+
+    def drawImage_ex(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=1.0, rect=None):
+        if self.app.renderType != 1 or self.app.texture != image:
+            if (self.app.texture is not None):
+                # if the texture changed or the render type has changed
+                self._renderPrimitives(self.app.renderType)
+            self.points = []
+            self.texs = []
+            self.colors = []
+
+            self.app.texture = image
+            self.app.renderType = 1
+
+        w = width if width is not None else image.width
+        h = height if height is not None else image.height
+
+        points = []
+        points.append([x, y])
+        points.append([x + w, y])
+        points.append([x + w, y + h])
+        points.append([x, y + h])
+
+        if (rotation != 0):
+            for point in points:
+                point[0] -= x
+                point[1] -= y
+                if (anchorX is not None):
+                    point[0] += anchorX * width
+                if (anchorY  is not None):
+                    point[1] += anchorY * height
+
+            rotated =[]
+            for i in range(0, len(points)):
+                rotatedPt = [0, 0]
+                rotatedPt[0] = points[i][0] * math.cos(rotation) - points[i][1] * math.sin(rotation)
+                rotatedPt[1] = points[i][0] * math.sin(rotation) + points[i][1] * math.cos(rotation)
+                rotated.append(rotatedPt)
+
+            for point in rotated:
+                point[0] += x
+                point[1] += y
+                if (anchorX is not None):
+                    point[0] -= anchorX * width
+                if (anchorY  is not None):
+                    point[1] -= anchorY * height
+
+            points = rotated
+
+        a = int(opacity * 255)
+
+        self.points += [points[0][0], points[0][1], \
+                                      points[1][0], points[1][1], \
+                                      points[2][0], points[2][1], \
+                                      points[3][0], points[3][1]
+                                      ]
+
+        self.texs += [0, 0, \
+                        1, 0, \
+                        1, 1,
+                        0 ,1]
+
+        self.colors += [255, 255, 255, a,\
+                                      255, 255, 255, a,\
+                                      255, 255, 255, a,
+                                      255, 255, 255, a]
 
     def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=None, rect=None):
+        '''
+        self.app.orderedGroupCounter += 1
+        self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
+
         if self.app.renderType != 1:
             self.app.renderType = 1
             self.app.orderedGroupCounter += 1
             self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
+            '''
         if (isinstance(image, str)):
             image = self.loadImage(image)
-            sprite = pyglet.sprite.Sprite(image, batch = self.app.batch, group = self.app.orderedGroup)
+            sprite = pyglet.sprite.Sprite(image)#, group = self.app.orderedGroup)
         else:
-            sprite = pyglet.sprite.Sprite(image, batch = self.app.batch, group = self.app.orderedGroup)
+            sprite = pyglet.sprite.Sprite(image)#, group = self.app.orderedGroup)
 
 
         if width is not None:
@@ -481,19 +625,21 @@ class Graphics:
             sprite.opacity = int(opacity * 255)
 
         sprite.rotation = rotation
-        #sprite.draw()
+        sprite.draw()
 
-        self.app.sprites.append(sprite)
+        #self.app.sprites.append(sprite)
 
         image.anchor_x = anchor_x
         image.anchor_y = anchor_y
 
     def drawLine(self, x1, y1, x2, y2, r = 1.0, g = 1.0, b = 1.0, a = 1.0, width = 1):
+        '''
         if self.app.renderType != 3:
             self.app.renderType = 3
             self.app.orderedGroupCounter += 1
             self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
         pyglet.gl.glLineWidth(width)
+        '''
         #pyglet.gl.glColor4f(r, g, b, a)
 
         '''
@@ -505,9 +651,8 @@ class Graphics:
         #pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
         #    ("v2f", (x1, y1, x2, y2))
         #)
-        verts = self.app.batch.add(2, pyglet.gl.GL_LINES, self.app.orderedGroup,\
+        pyglet.graphics.draw(2, pyglet.gl.GL_LINES, \
                                    ("v2f", (x1, y1, x2, y2)), ("c4f", (r, g, b, a, r, g, b, a)))
-        self.app.verts.append(verts)
 
 
 
@@ -584,7 +729,8 @@ class Graphics:
         verts = self.app.batch.add(6, pyglet.gl.GL_TRIANGLES, self.app.orderedGroup, \
                                    ('v2f', verts),
                                    ('c4f', colors))
-        self.app.verts.append(verts)
+        #self.app.verts.append(verts)
+
 
     def drawRawPixels(self, data, x, y, width, height):
         if self.app.renderType != 7:
