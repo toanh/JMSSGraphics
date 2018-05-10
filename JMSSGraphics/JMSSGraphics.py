@@ -302,51 +302,7 @@ class JMSSPygletApp(pyglet.window.Window):
         pyglet.clock.schedule_interval(self.mainloop, 1.0 / self.fps)
         pyglet.clock.set_fps_limit(self.fps)
 
-    #def on_draw(self):
-        #return
-
-    def mainloop_old(self, dt, *args, **kwargs):
-        #self.graphics.update()
-        #self.sprites = []
-        for sprite in self.sprites:
-            sprite.delete()
-        for shape in self.verts:
-            shape.delete()
-        for label in self.labels:
-            label.delete()
-
-        self.sprites = []
-        self.verts = []
-        self.labels = []
-
-        self.orderedGroupCounter = -1
-        self.renderType = 0
-
-        self.texture = None
-
-        if (self.draw_func is not None):
-            if (len(inspect.signature(self.draw_func)._parameters)) > 0:
-                self.draw_func(dt)
-            else:
-                self.draw_func()
-
-        self.invalid = False
-
     def mainloop(self, dt, *args, **kwargs):
-        #self.graphics.update()
-        #self.sprites = []
-        for sprite in self.sprites:
-            sprite.delete()
-        for shape in self.verts:
-            shape.delete()
-        for label in self.labels:
-            label.delete()
-
-        self.sprites = []
-        self.verts = []
-        self.labels = []
-
-        self.orderedGroupCounter = -1
         self.renderType = 0
 
         self.texture = None
@@ -360,8 +316,6 @@ class JMSSPygletApp(pyglet.window.Window):
                 self.draw_func()
 
         self.graphics._renderPrimitives(self.renderType)
-
-        self.batch.draw()
 
         self.invalid = False
 
@@ -447,12 +401,6 @@ class Graphics:
     def setFPS(self, fps):
         self.fps = fps
 
-    def _renderPrimitives(self, renderType):
-        if renderType == 1:
-            if (self.app.texture is not None):
-                self._drawTexturedQuads(self.app.texture)
-                self.app.vertex_array = []
-
     def loadImage(self, file):
         return pyglet.resource.image(file)
 
@@ -503,23 +451,32 @@ class Graphics:
         if sound in self.soundPlayers:
             self.soundPlayers[sound].pause()
 
-    def drawText_old(self, text, x, y, fontName = "Arial", fontSize = 10, color = (1, 1, 1, 1), anchorX = "left", anchorY ="bottom"):
-        #self.app.renderType = 2
+    def _renderPrimitives(self, renderType):
+        if renderType == 1:
+            if (self.app.texture is not None):
+                self._drawTexturedQuads(self.app.texture)
+        elif renderType == 3:
+            self._drawLines()
+        elif renderType == 4:
+            self._drawTriangles()
 
-        label = pyglet.text.Label(text, color = self._convColor(color), font_name=fontName, font_size=fontSize, x = x, y = y, \
-                                  anchor_x = anchorX, anchor_y = anchorY, \
-                                  batch = self.app.batch, group = self.app.orderedGroup)
-        label.draw()
+        self.app.vertex_array = []
 
+    def _drawLines(self):
+        array = (GLfloat * len(self.app.vertex_array))(*self.app.vertex_array)
 
-    def drawText(self, text, x, y, fontName = "Arial", fontSize = 10, color = (1, 1, 1, 1), anchorX = "left", anchorY ="bottom"):
-        self._renderPrimitives(self.app.renderType)
-        self.app.renderType = 2
+        glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT)
+        glInterleavedArrays(GL_C4F_N3F_V3F, 0, array)
+        glDrawArrays(GL_LINES, 0, len(self.app.vertex_array) // 10)
+        glPopClientAttrib()
 
-        label = pyglet.text.Label(text, color = self._convColor(color), font_name=fontName, font_size=fontSize, x = x, y = y, \
-                                  anchor_x = anchorX, anchor_y = anchorY, \
-                                  batch = self.app.batch, group = self.app.orderedGroup)
+    def _drawTriangles(self):
+        array = (GLfloat * len(self.app.vertex_array))(*self.app.vertex_array)
 
+        glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT)
+        glInterleavedArrays(GL_C4F_N3F_V3F, 0, array)
+        glDrawArrays(GL_TRIANGLES, 0, len(self.app.vertex_array) // 10)
+        glPopClientAttrib()
 
     def _drawTexturedQuads(self, image):
         glEnable(GL_TEXTURE_2D)
@@ -540,11 +497,17 @@ class Graphics:
         glDisable(GL_BLEND)
         glDisable(GL_TEXTURE_2D)
 
-    def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=1.0, rect=None):
+    # drawText draws immediately without batching
+    def drawText(self, text, x, y, fontName = "Arial", fontSize = 10, color = (1, 1, 1, 1), anchorX = "left", anchorY ="bottom"):
+        self._renderPrimitives(self.app.renderType)
 
-        if self.app.texture != image:
-            if self.app.texture is not None:
-                self._drawTexturedQuads(self.app.texture)
+        label = pyglet.text.Label(text, color = self._convColor(color), font_name=fontName, font_size=fontSize, x = x, y = y, \
+                                  anchor_x = anchorX, anchor_y = anchorY)
+        label.draw()
+
+    def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=1.0, rect=None):
+        if self.app.texture != image or self.app.renderType != 1:
+            self._renderPrimitives(self.app.renderType)
             self.app.texture = image
 
         self.app.renderType = 1
@@ -564,9 +527,9 @@ class Graphics:
                 point[0] -= x
                 point[1] -= y
                 if (anchorX is not None):
-                    point[0] += anchorX * w
+                    point[0] -= anchorX * w
                 if (anchorY  is not None):
-                    point[1] += anchorY * h
+                    point[1] -= anchorY * h
 
             rotated =[]
             for i in range(0, len(points)):
@@ -579,9 +542,9 @@ class Graphics:
                 point[0] += x
                 point[1] += y
                 if (anchorX is not None):
-                    point[0] -= anchorX * w
+                    point[0] += anchorX * w
                 if (anchorY  is not None):
-                    point[1] -= anchorY * h
+                    point[1] += anchorY * h
 
             points = rotated
 
@@ -598,10 +561,10 @@ class Graphics:
                         t[9] ,t[10]]
 
         colors = []
-        colors += [1, 1, 1, 1,\
-                                      1, 1, 1, 1,\
-                                      1, 1, 1, 1,
-                                      1, 1, 1, 1]
+        colors += [1, 1, 1, opacity,\
+                    1, 1, 1, opacity,\
+                    1, 1, 1, opacity,
+                    1, 1, 1, opacity]
 
         for i in range(4):
             self.app.vertex_array += texs[i*2:(i + 1)*2]
@@ -609,111 +572,85 @@ class Graphics:
             self.app.vertex_array += [0, 0, -1]
             self.app.vertex_array += final_points[i*2:(i + 1) * 2] + [1]
 
-
-    def drawImage_old(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=None, rect=None):
-        '''
-        self.app.orderedGroupCounter += 1
-        self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
-
-        if self.app.renderType != 1:
-            self.app.renderType = 1
-            self.app.orderedGroupCounter += 1
-            self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
-            '''
-        if (isinstance(image, str)):
-            image = self.loadImage(image)
-            sprite = pyglet.sprite.Sprite(image)#, group = self.app.orderedGroup)
-        else:
-            sprite = pyglet.sprite.Sprite(image)#, group = self.app.orderedGroup)
-
-
-        if width is not None:
-            sprite.scale_x =  width * 1.0 / sprite.width
-        if height is not None:
-            sprite.scale_y = height * 1.0  / sprite.height
-
-        anchor_x = image.anchor_x
-        anchor_y = image.anchor_y
-
-        dx = 0
-        dy = 0
-
-        if anchorX is not None:
-            dx = anchorX * image.width * sprite.scale_x
-            image.anchor_x = anchorX * image.width
-
-        if anchorY is not None:
-            dy = anchorY * image.height * sprite.scale_y
-            image.anchor_y = anchorY * image.height
-
-        sprite.x = x + dx
-        sprite.y = y + dy
-
-        if opacity is not None:
-            sprite.opacity = int(opacity * 255)
-
-        sprite.rotation = rotation
-        sprite.draw()
-
-        #self.app.sprites.append(sprite)
-
-        image.anchor_x = anchor_x
-        image.anchor_y = anchor_y
-
+    # width is not currently supported
     def drawLine(self, x1, y1, x2, y2, r = 1.0, g = 1.0, b = 1.0, a = 1.0, width = 1):
-        '''
         if self.app.renderType != 3:
+            self._renderPrimitives(self.app.renderType)
             self.app.renderType = 3
-            self.app.orderedGroupCounter += 1
-            self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
-        pyglet.gl.glLineWidth(width)
-        '''
-        #pyglet.gl.glColor4f(r, g, b, a)
 
-        '''
-        vertex_list = batch.add(2, pyglet.gl.GL_POINTS, None,
-                                ('v2i', (10, 15, 30, 35)),
-                                ('c3B', (0, 0, 255, 0, 255, 0))
-                                )
-        '''
-        #pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
-        #    ("v2f", (x1, y1, x2, y2))
-        #)
-        pyglet.graphics.draw(2, pyglet.gl.GL_LINES, \
-                                   ("v2f", (x1, y1, x2, y2)), ("c4f", (r, g, b, a, r, g, b, a)))
+        #GL_C4F_N3F_V3F
+        self.app.vertex_array += [r, g, b, a]
+        self.app.vertex_array += [0, 0, -1]
+        self.app.vertex_array += [x1, y1, 1]
+        self.app.vertex_array += [r, g, b, a]
+        self.app.vertex_array += [0, 0, -1]
+        self.app.vertex_array += [x2, y2, 1]
 
-
-
-    def drawCircle(self, color, x, y, radius):
+    def drawRect(self, x1, y1, x2, y2, r = 1.0, g = 1.0, b = 1.0, a = 1.0):
         if self.app.renderType != 4:
+            self._renderPrimitives(self.app.renderType)
             self.app.renderType = 4
-            self.app.orderedGroupCounter += 1
-            self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
-        verts = [x, y]
-        numPoints = int(radius * 5)
-        for i in range(numPoints):
-            angle = math.radians(float(i)/numPoints * 360.0)
+
+        verts = [x1, y1]
+        verts += [x1, y2]
+        verts += [x2, y2]
+        verts += [x1, y1]
+        verts += [x2, y2]
+        verts += [x2, y1]
+
+        for i in range(len(verts) // 2):
+            self.app.vertex_array += [r, g, b, a]
+            self.app.vertex_array += [0, 0, -1]
+            self.app.vertex_array += [verts[i * 2], verts[(i * 2) + 1], 1]
+        '''
+        verts = self.app.batch.add(6, pyglet.gl.GL_TRIANGLES, self.app.orderedGroup, \
+                                   ('v2f', verts),
+                                   ('c4f', colors))
+        '''
+
+
+    def drawCircle(self, x, y, radius, r = 1.0, g = 1.0, b = 1.0, a = 1.0):
+        if self.app.renderType != 4:
+            self._renderPrimitives(self.app.renderType)
+            self.app.renderType = 4
+
+        verts = []
+        numTris = int(radius * 5)
+        for i in range(numTris):
+            # centre point
+            verts += [x, y]
+
+            # point 1
+            angle = math.radians(float(i)/numTris * 360.0)
             c_x = radius * math.cos(angle) + x
             c_y = radius * math.sin(angle) + y
             verts += [c_x,c_y]
-        verts += [x + radius, y]
-        '''
-        circle = pyglet.graphics.vertex_list(1,
-            ('v2f', verts),
-            ('c4f', color)
-        )
-        '''
-        colors = color * (numPoints + 2)
 
+            # point next
+            angle = math.radians(float(i + 1)/numTris * 360.0)
+            c_x = radius * math.cos(angle) + x
+            c_y = radius * math.sin(angle) + y
+            verts += [c_x,c_y]
+
+        # GL_C4F_N3F_V3F
+        for i in range(numTris):
+            self.app.vertex_array += [r, g, b, a]
+            self.app.vertex_array += [0, 0, -1]
+            self.app.vertex_array += [verts[i * 6], verts[(i * 6) + 1], 1]
+
+            self.app.vertex_array += [r, g, b, a]
+            self.app.vertex_array += [0, 0, -1]
+            self.app.vertex_array += [verts[i * 6] + 2, verts[(i * 6) + 3], 1]
+
+            self.app.vertex_array += [r, g, b, a]
+            self.app.vertex_array += [0, 0, -1]
+            self.app.vertex_array += [verts[i * 6] + 4, verts[(i * 6) + 5], 1]
+        '''
         verts = self.app.batch.add(numPoints + 2, pyglet.gl.GL_TRIANGLE_FAN, self.app.orderedGroup, \
                                    ('v2f', verts),
                                    ('c4f', colors))
         self.app.verts.append(verts)
-
-
-        #circle = pyglet.graphics.vertex_list(numPoints + 2, ('v2f', verts))
-        #self.app.verts.append([circle, pyglet.gl.GL_TRIANGLE_FAN])
-        #circle.draw(pyglet.gl.GL_TRIANGLE_FAN)
+        '''
 
     def drawPixel(self, color, x, y):
         if self.app.renderType != 5:
@@ -735,30 +672,6 @@ class Graphics:
                                    ('v2i', verts),
                                    ('c4f', color))
         self.app.verts.append(verts)
-
-    def drawRect(self, color, x1, y1, x2, y2):
-        if self.app.renderType != 6:
-            self.app.renderType = 6
-            self.app.orderedGroupCounter += 1
-            self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
-
-        verts = [x1, y1]
-        verts += [x1, y2]
-        verts += [x2, y2]
-        verts += [x1, y1]
-        verts += [x2, y2]
-        verts += [x2, y1]
-        #rect = pyglet.graphics.vertex_list(4, ('v2f', verts))
-        #self.app.verts.append([rect, pyglet.gl.GL_TRIANGLE_FAN])
-        #rect.draw(pyglet.gl.GL_TRIANGLE_FAN)
-
-        colors = color * (6)
-
-        verts = self.app.batch.add(6, pyglet.gl.GL_TRIANGLES, self.app.orderedGroup, \
-                                   ('v2f', verts),
-                                   ('c4f', colors))
-        #self.app.verts.append(verts)
-
 
     def drawRawPixels(self, data, x, y, width, height):
         if self.app.renderType != 7:
