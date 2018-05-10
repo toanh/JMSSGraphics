@@ -226,6 +226,36 @@ MOUSE_BUTTON_MIDDLE = 3
 
 from pyglet.gl import *
 
+
+class TextureEnableGroup(pyglet.graphics.Group):
+    def set_state(self):
+        glEnable(GL_TEXTURE_2D)
+
+    def unset_state(self):
+        glDisable(GL_TEXTURE_2D)
+
+texture_enable_group = TextureEnableGroup()
+
+class TextureBindGroup(pyglet.graphics.Group):
+    def __init__(self, texture):
+        super(TextureBindGroup, self).__init__(parent=texture_enable_group)
+        assert texture.target == GL_TEXTURE_2D
+        self.texture = texture
+
+    def set_state(self):
+        glBindTexture(GL_TEXTURE_2D, self.texture.id)
+
+    # No unset_state method required.
+
+    def __eq__(self, other):
+        return (self.__class__ is other.__class__ and
+                self.texture.id == other.texture.id and
+                self.texture.target == other.texture.target and
+                self.parent == other.parent)
+
+    def __hash__(self):
+        return hash((self.texture.id, self.texture.target))
+
 class JMSSPygletApp(pyglet.window.Window):
     def __init__(self, fps, graphics, *args, **kwargs):
         super(JMSSPygletApp, self).__init__(width=graphics.width,
@@ -275,7 +305,7 @@ class JMSSPygletApp(pyglet.window.Window):
     #def on_draw(self):
         #return
 
-    def mainloop(self, dt, *args, **kwargs):
+    def mainloop_old(self, dt, *args, **kwargs):
         #self.graphics.update()
         #self.sprites = []
         for sprite in self.sprites:
@@ -302,7 +332,7 @@ class JMSSPygletApp(pyglet.window.Window):
 
         self.invalid = False
 
-    def mainloop_ex(self, dt, *args, **kwargs):
+    def mainloop(self, dt, *args, **kwargs):
         #self.graphics.update()
         #self.sprites = []
         for sprite in self.sprites:
@@ -321,6 +351,8 @@ class JMSSPygletApp(pyglet.window.Window):
 
         self.texture = None
 
+        self.vertex_array = []
+
         if (self.draw_func is not None):
             if (len(inspect.signature(self.draw_func)._parameters)) > 0:
                 self.draw_func(dt)
@@ -328,6 +360,8 @@ class JMSSPygletApp(pyglet.window.Window):
                 self.draw_func()
 
         self.graphics._renderPrimitives(self.renderType)
+
+        self.batch.draw()
 
         self.invalid = False
 
@@ -417,25 +451,10 @@ class Graphics:
         if renderType == 1:
             if (self.app.texture is not None):
                 self._drawTexturedQuads(self.app.texture)
-
-    def loadImage_ex(self, file):
-        img = pyglet.resource.image(file)
-
-        rawimage = img.get_image_data()
-        pitch = rawimage.width * len('RGBA')
-        data = rawimage.get_data('RGBA', pitch)
-
-        glBindTexture(GL_TEXTURE_2D, img.get_texture().id)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width, img.height,0, GL_RGBA, GL_UNSIGNED_BYTE, data)
-        glBindTexture(GL_TEXTURE_2D, 0)
-        return img
+                self.app.vertex_array = []
 
     def loadImage(self, file):
-        img = pyglet.resource.image(file)
-
-        return img
+        return pyglet.resource.image(file)
 
     def createSprite(self, image):
         # if the filename is supplied, create an image and autocreate the sprite
@@ -484,7 +503,7 @@ class Graphics:
         if sound in self.soundPlayers:
             self.soundPlayers[sound].pause()
 
-    def drawText(self, text, x, y, fontName = "Arial", fontSize = 10, color = (1, 1, 1, 1), anchorX = "left", anchorY ="bottom"):
+    def drawText_old(self, text, x, y, fontName = "Arial", fontSize = 10, color = (1, 1, 1, 1), anchorX = "left", anchorY ="bottom"):
         #self.app.renderType = 2
 
         label = pyglet.text.Label(text, color = self._convColor(color), font_name=fontName, font_size=fontSize, x = x, y = y, \
@@ -493,44 +512,43 @@ class Graphics:
         label.draw()
 
 
-    def drawText_ex(self, text, x, y, fontName = "Arial", fontSize = 10, color = (1, 1, 1, 1), anchorX = "left", anchorY ="bottom"):
+    def drawText(self, text, x, y, fontName = "Arial", fontSize = 10, color = (1, 1, 1, 1), anchorX = "left", anchorY ="bottom"):
         self._renderPrimitives(self.app.renderType)
         self.app.renderType = 2
 
         label = pyglet.text.Label(text, color = self._convColor(color), font_name=fontName, font_size=fontSize, x = x, y = y, \
                                   anchor_x = anchorX, anchor_y = anchorY, \
                                   batch = self.app.batch, group = self.app.orderedGroup)
-        label.draw()
+
 
     def _drawTexturedQuads(self, image):
-        glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-
         glEnable(GL_TEXTURE_2D)
+        glEnable(GL_BLEND)
+
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glBindTexture(GL_TEXTURE_2D, image.get_texture().id)
 
-        pyglet.graphics.draw(len(self.points)//2, pyglet.gl.GL_QUADS,
-                             ("v2f", self.points),
-                             ("t2f", self.texs),
-                             ("c4B", self.colors))
+        array = (GLfloat * len(self.app.vertex_array))(*self.app.vertex_array)
 
-        glDisable(GL_TEXTURE_2D)
+        glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT)
+        glInterleavedArrays(GL_T2F_C4F_N3F_V3F, 0, array)
+        glDrawArrays(GL_QUADS, 0, len(self.app.vertex_array) // 12)
+        glPopClientAttrib()
+
+        glBindTexture(GL_TEXTURE_2D, 0)
+
         glDisable(GL_BLEND)
+        glDisable(GL_TEXTURE_2D)
 
-    def drawImage_ex(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=1.0, rect=None):
-        if self.app.renderType != 1 or self.app.texture != image:
-            if (self.app.texture is not None):
-                # if the texture changed or the render type has changed
-                self._renderPrimitives(self.app.renderType)
-            self.points = []
-            self.texs = []
-            self.colors = []
+    def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=1.0, rect=None):
 
-            self.app.texture = image
-            self.app.renderType = 1
+        self.app.texture = image
 
-        w = width if width is not None else image.width
-        h = height if height is not None else image.height
+        self.app.renderType = 1
+
+        texture = image.get_texture()
+        t = texture.tex_coords
+        w, h = texture.width, texture.height
 
         points = []
         points.append([x, y])
@@ -564,25 +582,32 @@ class Graphics:
 
             points = rotated
 
-        a = int(opacity * 255)
+        final_points = []
+        final_points += [points[0][0], points[0][1], \
+                        points[1][0], points[1][1], \
+                        points[2][0], points[2][1], \
+                        points[3][0], points[3][1]]
 
-        self.points += [points[0][0], points[0][1], \
-                                      points[1][0], points[1][1], \
-                                      points[2][0], points[2][1], \
-                                      points[3][0], points[3][1]
-                                      ]
+        texs = []
+        texs += [t[0], t[1], \
+                        t[3], t[4], \
+                        t[6], t[7],
+                        t[9] ,t[10]]
 
-        self.texs += [0, 0, \
-                        1, 0, \
-                        1, 1,
-                        0 ,1]
+        colors = []
+        colors += [1, 1, 1, 1,\
+                                      1, 1, 1, 1,\
+                                      1, 1, 1, 1,
+                                      1, 1, 1, 1]
 
-        self.colors += [255, 255, 255, a,\
-                                      255, 255, 255, a,\
-                                      255, 255, 255, a,
-                                      255, 255, 255, a]
+        for i in range(4):
+            self.app.vertex_array += texs[i*2:(i + 1)*2]
+            self.app.vertex_array += colors[i*4:(i + 1) * 4]
+            self.app.vertex_array += [0, 0, -1]
+            self.app.vertex_array += final_points[i*2:(i + 1) * 2] + [1]
 
-    def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=None, rect=None):
+
+    def drawImage_old(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=None, rect=None):
         '''
         self.app.orderedGroupCounter += 1
         self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
