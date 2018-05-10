@@ -309,6 +309,9 @@ class JMSSPygletApp(pyglet.window.Window):
 
         self.vertex_array = []
 
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
         if (self.draw_func is not None):
             if (len(inspect.signature(self.draw_func)._parameters)) > 0:
                 self.draw_func(dt)
@@ -316,6 +319,8 @@ class JMSSPygletApp(pyglet.window.Window):
                 self.draw_func()
 
         self.graphics._renderPrimitives(self.renderType)
+
+        glDisable(GL_BLEND)
 
         self.invalid = False
 
@@ -404,13 +409,6 @@ class Graphics:
     def loadImage(self, file):
         return pyglet.resource.image(file)
 
-    def createSprite(self, image):
-        # if the filename is supplied, create an image and autocreate the sprite
-        if (isinstance(image, str)):
-            return pyglet.sprite.Sprite(self.loadImage(image))
-        else:
-            return pyglet.sprite.Sprite(image)
-
     def isKeyDown(self, key):
         return self.app.keys[key]
 
@@ -459,6 +457,8 @@ class Graphics:
             self._drawLines()
         elif renderType == 4:
             self._drawTriangles()
+        elif renderType == 5:
+            self._drawPoints()
 
         self.app.vertex_array = []
 
@@ -478,11 +478,17 @@ class Graphics:
         glDrawArrays(GL_TRIANGLES, 0, len(self.app.vertex_array) // 10)
         glPopClientAttrib()
 
+    def _drawPoints(self):
+        array = (GLfloat * len(self.app.vertex_array))(*self.app.vertex_array)
+
+        glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT)
+        glInterleavedArrays(GL_C4F_N3F_V3F, 0, array)
+        glDrawArrays(GL_POINTS, 0, len(self.app.vertex_array) // 10)
+        glPopClientAttrib()
+
     def _drawTexturedQuads(self, image):
         glEnable(GL_TEXTURE_2D)
-        glEnable(GL_BLEND)
 
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glBindTexture(GL_TEXTURE_2D, image.get_texture().id)
 
         array = (GLfloat * len(self.app.vertex_array))(*self.app.vertex_array)
@@ -493,8 +499,6 @@ class Graphics:
         glPopClientAttrib()
 
         glBindTexture(GL_TEXTURE_2D, 0)
-
-        glDisable(GL_BLEND)
         glDisable(GL_TEXTURE_2D)
 
     # drawText draws immediately without batching
@@ -506,11 +510,12 @@ class Graphics:
         label.draw()
 
     def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=1.0, rect=None):
+        if (isinstance(image, str)):
+            image = self.loadImage(image)
         if self.app.texture != image or self.app.renderType != 1:
             self._renderPrimitives(self.app.renderType)
             self.app.texture = image
-
-        self.app.renderType = 1
+            self.app.renderType = 1
 
         texture = image.get_texture()
         t = texture.tex_coords
@@ -602,12 +607,6 @@ class Graphics:
             self.app.vertex_array += [r, g, b, a]
             self.app.vertex_array += [0, 0, -1]
             self.app.vertex_array += [verts[i * 2], verts[(i * 2) + 1], 1]
-        '''
-        verts = self.app.batch.add(6, pyglet.gl.GL_TRIANGLES, self.app.orderedGroup, \
-                                   ('v2f', verts),
-                                   ('c4f', colors))
-        '''
-
 
     def drawCircle(self, x, y, radius, r = 1.0, g = 1.0, b = 1.0, a = 1.0):
         if self.app.renderType != 4:
@@ -640,44 +639,26 @@ class Graphics:
 
             self.app.vertex_array += [r, g, b, a]
             self.app.vertex_array += [0, 0, -1]
-            self.app.vertex_array += [verts[i * 6] + 2, verts[(i * 6) + 3], 1]
+            self.app.vertex_array += [verts[i * 6 + 2], verts[(i * 6) + 3], 1]
 
             self.app.vertex_array += [r, g, b, a]
             self.app.vertex_array += [0, 0, -1]
-            self.app.vertex_array += [verts[i * 6] + 4, verts[(i * 6) + 5], 1]
-        '''
-        verts = self.app.batch.add(numPoints + 2, pyglet.gl.GL_TRIANGLE_FAN, self.app.orderedGroup, \
-                                   ('v2f', verts),
-                                   ('c4f', colors))
-        self.app.verts.append(verts)
-        '''
+            self.app.vertex_array += [verts[i * 6 + 4], verts[(i * 6) + 5], 1]
 
-    def drawPixel(self, color, x, y):
+    def drawPixel(self, x, y, r = 1.0, g = 1.0, b = 1.0, a = 1.0):
         if self.app.renderType != 5:
+            self._renderPrimitives(self.app.renderType)
             self.app.renderType = 5
-            self.app.orderedGroupCounter += 1
-            self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
 
-        verts = [x, y]
-
-        #point = pyglet.graphics.vertex_list(1, ('v2f', verts))
-        '''
-        point = pyglet.graphics.vertex_list(1,
-            ('v2i', verts),
-            ('c4f', color)
-        )
-        '''
-
-        verts = self.app.batch.add(1, pyglet.gl.GL_POINTS, self.app.orderedGroup, \
-                                   ('v2i', verts),
-                                   ('c4f', color))
-        self.app.verts.append(verts)
+        #GL_C4F_N3F_V3F
+        self.app.vertex_array += [r, g, b, a]
+        self.app.vertex_array += [0, 0, -1]
+        self.app.vertex_array += [x, y, 1]
 
     def drawRawPixels(self, data, x, y, width, height):
-        if self.app.renderType != 7:
-            self.app.renderType = 7
-            self.app.orderedGroupCounter += 1
-            self.app.orderedGroup = pyglet.graphics.OrderedGroup(self.app.orderedGroupCounter)
+        if self.app.renderType != 5:
+            self._renderPrimitives(self.app.renderType)
+            self.app.renderType = 5
 
         verts = []
         num_points = width * height
@@ -688,12 +669,14 @@ class Graphics:
         colours = []
         for x2 in range(width):
             for y2 in range(height):
+                # TODO: alpha not yet supported
                 colours += [data[(y2 * width + x2) * 3], \
                             data[(y2 * width + x2) * 3 + 1], \
                             data[(y2 * width + x2) * 3 + 2],
                             1.0]
 
-        verts = self.app.batch.add(num_points, pyglet.gl.GL_POINTS, self.app.orderedGroup, \
-                                   ('v2i', verts),
-                                   ('c4f', colours))
-        self.app.verts.append(verts)
+        #GL_C4F_N3F_V3F
+        for i in range(num_points):
+            self.app.vertex_array += [colours[i * 4], colours[i * 4 + 1], colours[i * 4 + 2], colours[i * 4 + 3]]
+            self.app.vertex_array += [0, 0, -1]
+            self.app.vertex_array += [verts[i * 2], verts[i * 2 + 1], 1]
