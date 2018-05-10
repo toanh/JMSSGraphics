@@ -226,36 +226,6 @@ MOUSE_BUTTON_MIDDLE = 3
 
 from pyglet.gl import *
 
-
-class TextureEnableGroup(pyglet.graphics.Group):
-    def set_state(self):
-        glEnable(GL_TEXTURE_2D)
-
-    def unset_state(self):
-        glDisable(GL_TEXTURE_2D)
-
-texture_enable_group = TextureEnableGroup()
-
-class TextureBindGroup(pyglet.graphics.Group):
-    def __init__(self, texture):
-        super(TextureBindGroup, self).__init__(parent=texture_enable_group)
-        assert texture.target == GL_TEXTURE_2D
-        self.texture = texture
-
-    def set_state(self):
-        glBindTexture(GL_TEXTURE_2D, self.texture.id)
-
-    # No unset_state method required.
-
-    def __eq__(self, other):
-        return (self.__class__ is other.__class__ and
-                self.texture.id == other.texture.id and
-                self.texture.target == other.texture.target and
-                self.parent == other.parent)
-
-    def __hash__(self):
-        return hash((self.texture.id, self.texture.target))
-
 class JMSSPygletApp(pyglet.window.Window):
     def __init__(self, fps, graphics, *args, **kwargs):
         super(JMSSPygletApp, self).__init__(width=graphics.width,
@@ -284,15 +254,7 @@ class JMSSPygletApp(pyglet.window.Window):
         self.mouse_button_pressed = MOUSE_BUTTON_NONE
         self.mouse_button_released = MOUSE_BUTTON_NONE
 
-        self.batch = pyglet.graphics.Batch()
-
-        self.sprites = []
-        self.verts = []
-        self.labels = []
-
-        self.orderedGroupCounter = 0
         self.renderType = 0         # 1 = sprite, 2 = label, 3 = vertices
-        self.orderedGroup = None
 
         #self.set_mouse_visible(False)
 
@@ -427,9 +389,6 @@ class Graphics:
     def _convColor(self, c):
         return (int(c[0] * 255.0), int(c[1] * 255.0), int(c[2] * 255.0), int(c[3] * 255.0))
 
-    def createLabel(self, text, fontName, fontSize, x, y, anchorX, anchorY):
-        return pyglet.text.Label(text, font_name=fontName, font_size=fontSize, x = x, y = y, anchor_x = anchorX, anchor_y = anchorY)
-
     def loadSound(self, filename, streaming = False):
         return pyglet.media.load(filename=filename, streaming=streaming)
 
@@ -520,6 +479,10 @@ class Graphics:
         texture = image.get_texture()
         t = texture.tex_coords
         w, h = texture.width, texture.height
+        if width is not None:
+            w = width
+        if height is not None:
+            h = height
 
         points = []
         points.append([x, y])
