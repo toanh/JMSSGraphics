@@ -565,6 +565,8 @@ class Graphics:
                         t[6], t[7],
                         t[9] ,t[10]]
 
+        if opacity is None:
+            opacity = 1.0
         colors = []
         colors += [1, 1, 1, opacity,\
                     1, 1, 1, opacity,\
