@@ -542,7 +542,10 @@ class Graphics:
 
     def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=1.0, rect=None):
 
-        self.app.texture = image
+        if self.app.texture != image:
+            if self.app.texture is not None:
+                self._drawTexturedQuads(self.app.texture)
+            self.app.texture = image
 
         self.app.renderType = 1
 
@@ -561,9 +564,9 @@ class Graphics:
                 point[0] -= x
                 point[1] -= y
                 if (anchorX is not None):
-                    point[0] += anchorX * width
+                    point[0] += anchorX * w
                 if (anchorY  is not None):
-                    point[1] += anchorY * height
+                    point[1] += anchorY * h
 
             rotated =[]
             for i in range(0, len(points)):
@@ -576,9 +579,9 @@ class Graphics:
                 point[0] += x
                 point[1] += y
                 if (anchorX is not None):
-                    point[0] -= anchorX * width
+                    point[0] -= anchorX * w
                 if (anchorY  is not None):
-                    point[1] -= anchorY * height
+                    point[1] -= anchorY * h
 
             points = rotated
 
