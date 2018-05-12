@@ -1,6 +1,7 @@
 import turtle
 import math
 import inspect
+import time
 
 # ASCII commands
 KEY_BACKSPACE     = 0xff08
@@ -253,12 +254,14 @@ class Graphics:
 
         self.root = tk.Tk()
         self.root.title(title)
-        canvas = tk.Canvas(master=self.root, width=width, height=height)
+        self.canvas = tk.Canvas(master=self.root, width=width, height=height)
 
-        canvas.pack()
+        self.canvas.pack()
 
-        self.t = turtle.RawTurtle(canvas)
+        self.t = turtle.RawTurtle(self.canvas)
         self.screen = self.t.getscreen()
+
+        self.t.ht()
 
         self.root.protocol('WM_DELETE_WINDOW', self.doClose)  # root is your root window
 
@@ -360,27 +363,26 @@ class Graphics:
         self.draw_func = func
 
     def run(self):
-        self.t.ht()
         self.screen.tracer(0, 0)
+
+        prior = time.time()
 
         while not self.done:
             if (self.draw_func is not None):
+                current = time.time()
+                dt = current - prior
+
                 if (len(inspect.signature(self.draw_func)._parameters)) > 0:
                     # TODO: implement dt here!
-                    self.draw_func(0)
+                    self.draw_func(dt)
                 else:
                     self.draw_func()
 
-            self.screen.update()
+                self.screen.update()
+
+                prior = current
 
         self.root.destroy()
-        # to ensure that the last draw call is not a turtle movement based one
-        # doesn't seem to draw if the last operation is one of the ^^
-        #self.drawText("hello, world!", 0, 0, fontSize=20, color=(1, 0, 0))
-
-
-        #self.screen.ontimer(self.run, int(1 / self.fps * 1000))
-        #self.screen.ontimer(self.run, 100)
 
     """
     Loads an image from disk and returns it as an object to be used in the drawImage() function
@@ -455,9 +457,16 @@ class Graphics:
         self.t.pu()
         self.t.color([color[0], color[1], color[2]])
         self.t.setpos(self._convXY(x, y))
+        self.t.write(text)#, move=True, align="left", font=(fontName, fontSize, "normal"))
+
         self.t.pd()
-        self.t.write(text, move=False, align="left", font=(fontName, fontSize, "normal"))
-        self.t.pu()
+
+        # TODO: BUG - anything drawn AFTER the write() call will flicker!!??
+        # why??
+        self.t.write(text, move=False, align="left", font=("Courier", fontSize, "normal"))
+
+        #self.t.pd()
+
 
     def drawLine(self, x1, y1, x2, y2, r = 1.0, g = 1.0, b = 1.0, a = 1.0, width = 1):
         self.t.pu()

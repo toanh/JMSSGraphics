@@ -65,7 +65,7 @@ def repack_sub_pixels(rows):
 rows = read_rows("image.bmp")
 
 output_file = open("image.csv", "w")
-rows.reverse()
+#rows.reverse()
 for row in rows:
     i = 0
     while i < 640:
@@ -78,7 +78,6 @@ for row in rows:
         print(row[i + 2])
         '''
         i += 1       
-  
 
 output_file.close()
 

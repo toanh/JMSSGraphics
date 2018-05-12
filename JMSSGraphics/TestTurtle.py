@@ -23,7 +23,6 @@ def game():
 
     if jmss.isKeyDown(KEY_W):
         ball_ypos += 10
-        print("argh")
     if jmss.isKeyDown(KEY_S):
         ball_ypos -= 10
     if jmss.isKeyDown(KEY_A):
@@ -51,41 +50,32 @@ def game():
         ball_xpos = 600 - 16
         ball_xspeed = -ball_xspeed
 
-    jmss.drawImage(bg_img, 0, 0, opacity=0)
-    jmss.drawImage(ball_img, 0, 0, opacity=0)
+    jmss.drawImage(bg_img, 0, 0, opacity=1)
+    jmss.drawImage("Frame1.png", 0, 0, opacity=1)
 
     num_balls = 1000
     dim = math.sqrt(num_balls)
-    for i in range(num_balls):
-        jmss.drawImage(ball_img, x=600 - ball_xpos - i //dim * 12, y=ball_ypos + i %dim * 12)
-        pass
-    '''
-    for i in range(100):
-        jmss.drawCircle(color = (1,0,0,1), x=ball_xpos, y= ball_ypos + i * 8, radius=4)
-        
-    for i in range(100):
-        #jmss.drawCircle(color = (1,0,0,1), x=ball_xpos, y= ball_ypos + i * 8, radius=4)
-        #jmss.drawCircle(color = (1,0,0,1), x=ball_xpos, y=ball_ypos + i * 8, radius=4)
-        jmss.drawPixel(color=(1, 1, 0, 1), x=ball_xpos, y= i * 8)
-        #jmss.drawRect(color=(0, 1, 0, 1), x1=ball_xpos + i * 8, y1=0, x2 = ball_xpos + i * 8 + 1, y2 = 8)
-    for i in range(100):
-        jmss.drawRect(color=(0, 1, 0, 1), x1=ball_xpos + i * 8, y1=0, x2 = ball_xpos + i * 8 + 1, y2 = 8)
-
-    jmss.drawRect(color=(0, 1, 0, 1), x1=ball_xpos, y1=100, x2 = ball_xpos + 100, y2 = 110)
-    
-
     jmss.drawLine(600, 400, 0, 0, 1, 1, 0, 1, 5)
 
-    jmss.drawPixel((1, 1, 0, 1), 200, 200)'''
+    for i in range(num_balls):
+        jmss.drawImage(ball_img, x=600 - ball_xpos - i //dim * 12, y=ball_ypos + i %dim * 12, \
+                       rotation=600 - ball_xpos - i //dim * 12, anchorY=0.5, anchorX=0.5, opacity = 0.5)
+
+    for i in range(100):
+        jmss.drawRect(x1=ball_xpos, y1=100, x2=ball_xpos + 100, y2=110, r=0, g=1, b=0, a=1)
+        jmss.drawCircle(ball_xpos, ball_ypos + i * 8, 4, 1, 0, 0, 0.5)
+        jmss.drawRect(x1=ball_xpos + i * 8, y1=0, x2=ball_xpos + i * 8 + 2, y2=8, r=1, g=1, b=1, a=0.5)
+
+    for i in range(100):
+        jmss.drawPixel(x=ball_xpos + i * 8, y= i * 8, r= 1, g = 1, b = 0, a = 1)
+
+    jmss.drawLine(0, 400, 600, 0, 1, 1, 0, 1, 5)
+    jmss.drawLine(10, 400, 610, 0, 1, 0, 0, 0.5, 5)
+
+    jmss.drawPixel(10, 300, 1, 1, 1, 1)
 
     jmss.drawText("hello, world!", 0, 0, fontSize=20, color=(1, 0, 0, 1))
 
-    
-
-
-    #jmss.drawLine(600, 0, 0, 400, 0, 1, 0, 1, 5)
-
-
-
+    jmss.drawLine(600, 200, 0, 400, 0, 1, 0, 1, 5)
 jmss.run()
 

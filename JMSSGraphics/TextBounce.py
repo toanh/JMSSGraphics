@@ -1,4 +1,4 @@
-from JMSSGraphics.JMSSGraphics_pyglet import *
+from JMSSGraphics import *
 
 import math
 

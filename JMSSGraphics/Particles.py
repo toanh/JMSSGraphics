@@ -223,7 +223,6 @@ def KeyListener(event):
         s = s + 1
         Infect(cellrow, cellcol, s, population)
         print (pos)
-
 def InfectionSim():
     global s
     UpdatePopulation()
@@ -481,7 +480,7 @@ def TurtleTest():
     jmss.drawImage(image, (0 - 16,y + 16), 0, None, 255 - (200-y)/400 * 255, (32,32))
 
 
-
+'''
 jmss = Graphics(800, 600, "Galaxies Simulation")
 image = jmss.loadImage("smiley.png")
 jmss.setFPS(60)
@@ -493,17 +492,17 @@ t2 = jmss.createTurtle()
 t3 = jmss.createTurtle()
 jmss.run(TurtleTest)
 
-
 '''
+
 jmss = Graphics(800, 600, "Bouncing Ghosts")
 #image = jmss.loadImage("smiley.png")
 #image = jmss.loadImage("ghost.png")
 #bld = jmss.loadImage("building.png")
-#SetupPopulation()
-#jmss.addEventListener(KeyListener)
-#jmss.run(InfectionSim)
-jmss.run(mainLoop)
+SetupPopulation()
+jmss.addEventListener(KeyListener)
+jmss.run(InfectionSim)
+
+#jmss.run(mainLoop)
 #jmss.run(drawFractal)
 
 
-'''

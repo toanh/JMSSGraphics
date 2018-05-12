@@ -1,4 +1,4 @@
-use_turtle = True
+use_turtle = False
 
 if use_turtle:
     from JMSSGraphics_turtle import *
@@ -240,12 +240,17 @@ class Game:
             self.bg_image = jmss.loadImage("background.gif")
         else:
             self.title_image = jmss.loadImage("title.png")
-            self.bg_image = jmss.loadImage("background.png")
+
+            # TODO: why is it sometimes a texture region and sometimes a texture??
+            # it bombs out when it is a texture and NOT a texture region
+            # why does this occur in the first place?
+            #self.bg_image = jmss.loadImage("background.png")
+            self.bg_image = jmss.loadImage("title.png")
         self.bg_x = 0
 
         # pre-load our sound files
         self.blip_sound = jmss.loadSound("blip.wav", streaming=False)
-        self.background_music = jmss.loadSound("cybernoid.wav", streaming=True)
+        self.background_music = jmss.loadSound("Cybernoid.wav", streaming=True)
         self.laser = jmss.loadSound("shoot.wav", streaming=False)
 
         jmss.playSound(self.background_music)
@@ -298,7 +303,6 @@ class Game:
             self.bg_x = 0
 
         self.drawTriangleList(self.triList)
-        
 
         for b in self.bullets:
             b.Draw()
@@ -308,12 +312,8 @@ class Game:
         self.p1.Draw()
         self.p2.Draw()
 
-
-
-        jmss.drawText("Lives: " + str(self.p1.lives), 10, 350, fontSize=20, color=(1,1,1,1))
-        jmss.drawText("Lives: " + str(self.p2.lives), 490, 350, fontSize=20, color=(1,1,1,1))
-
-        
+        jmss.drawText("Lives: " + str(self.p1.lives), 10, 350, fontSize=20, color=(1, 1, 1, 1))
+        jmss.drawText("Lives: " + str(self.p2.lives), 490, 350, fontSize=20, color=(1, 1, 1, 1))
 
         '''
         mousePos = jmss.getMousePos()
