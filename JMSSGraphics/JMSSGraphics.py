@@ -301,6 +301,13 @@ class JMSSPygletApp(pyglet.window.Window):
     def on_key_release(self, symbol, modifiers):
         self.keys[symbol] = False
 
+    def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+        self.mouse_x = x
+        self.mouse_y = y
+        self.mouse_dx = dx
+        self.mouse_dy = dy
+        self.invalid = False
+
     def on_mouse_motion(self, x, y, dx, dy):
         self.mouse_x = x
         self.mouse_y = y
@@ -390,10 +397,10 @@ class Graphics:
         return self.app.mouse_button_released == key
 
     def getMousePos(self):
-        return (self.app.mouse_x, self.app.mouse_y)
+        return self.app.mouse_x, self.app.mouse_y
 
     def getMouseDelta(self):
-        return (self.app.mouse_dx, self.app.mouse_dy)
+        return self.app.mouse_dx, self.app.mouse_dy
 
     def _convColor(self, c):
         return (int(c[0] * 255.0), int(c[1] * 255.0), int(c[2] * 255.0), int(c[3] * 255.0))
