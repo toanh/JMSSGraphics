@@ -1,10 +1,14 @@
-# Version 1.2.1 (unstable)
+# Version 1.2.3 (unstable)
 
 import pyglet
 import math
 import inspect
 
 from pyglet.window import mouse
+
+# rendering blend types
+BLEND_ALPHA     = 0
+BLEND_ADDITIVE  = 1
 
 # Key symbol constants
 
@@ -255,6 +259,7 @@ class JMSSPygletApp(pyglet.window.Window):
         self.mouse_button_released = MOUSE_BUTTON_NONE
 
         self.renderType = 0         # 1 = sprite, 2 = label, 3 = vertices
+        self.blend_type = BLEND_ALPHA
 
         #self.set_mouse_visible(False)
 
@@ -272,7 +277,11 @@ class JMSSPygletApp(pyglet.window.Window):
         self.vertex_array = []
 
         glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+        if self.blend_type == BLEND_ALPHA:
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        elif self.blend_type == BLEND_ADDITIVE:
+            glBlendFunc(GL_ONE, GL_ONE)
 
         if (self.draw_func is not None):
             if (len(inspect.signature(self.draw_func)._parameters)) > 0:
@@ -388,6 +397,12 @@ class Graphics:
 
     def _convColor(self, c):
         return (int(c[0] * 255.0), int(c[1] * 255.0), int(c[2] * 255.0), int(c[3] * 255.0))
+
+    def set_blend_type(self, type):
+        self.app.blend_type = type
+
+    def get_blend_type(self):
+        return self.app.blend_type
 
     def loadSound(self, filename, streaming = False):
         return pyglet.media.load(filename=filename, streaming=streaming)
