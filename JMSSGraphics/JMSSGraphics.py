@@ -1,4 +1,4 @@
-# Version 1.2.3 (unstable)
+# Version 1.2.4
 
 import pyglet
 import math
@@ -490,7 +490,7 @@ class Graphics:
                                   anchor_x = anchorX, anchor_y = anchorY)
         label.draw()
 
-    def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=1.0, rect=None):
+    def drawImage(self, image, x, y, width = None, height = None, rotation=0, anchorX = None, anchorY = None, opacity=1.0, r = 1.0, g = 1.0, b = 1.0, rect=None):
         if (isinstance(image, str)):
             image = self.loadImage(image)
         if self.app.texture != image or self.app.renderType != 1:
@@ -553,10 +553,10 @@ class Graphics:
         if opacity is None:
             opacity = 1.0
         colors = []
-        colors += [1, 1, 1, opacity,\
-                    1, 1, 1, opacity,\
-                    1, 1, 1, opacity,
-                    1, 1, 1, opacity]
+        colors += [r, g, b, opacity, \
+                   r, g, b, opacity, \
+                   r, g, b, opacity, \
+                   r, g, b, opacity]
 
         for i in range(4):
             self.app.vertex_array += texs[i*2:(i + 1)*2]
